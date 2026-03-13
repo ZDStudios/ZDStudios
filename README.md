@@ -11,7 +11,7 @@ Hi 👋 My name is ZDStudios
 
 I'm a developer, hacker, and the lead dev behind **SchoolMod** — a project built to enhance and mod the school experience. I enjoy poking at systems, writing code, and building tools that push boundaries.
 
-* 🚀  I'm currently working on [SchoolMod](https://github.com/ZDStudios)
+* 🚀  I'm currently working on [SchoolMod](https://github.com/ZDStudios/SchoolMod)
 * 🔐  I enjoy CTFs, security research, and finding out how things work under the hood
 * 🤝  Open to collaborating on interesting mods, tools, and security projects
 * ✨  Always learning — currently deep in low-level programming and exploit development
