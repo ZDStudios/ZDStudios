@@ -9,12 +9,13 @@ Hi 👋 My name is ZDStudios
 
 <a href="http://www.github.com/ZDStudios" align="right"><img src="https://github-readme-stats-five-beta-99.vercel.app/api?username=ZDStudios&show_icons=true&hide=&count_private=true&title_color=0891b2&text_color=ffffff&icon_color=0891b2&bg_color=1c1917&hide_border=true&show_icons=true" alt="ZDStudios's GitHub stats" align="right"/></a>
 
-I'm a developer, hacker, and the lead dev behind **SchoolMod** — a project built to enhance and mod the school experience. I enjoy poking at systems, writing code, and building tools that push boundaries.
+I'm a developer, hacker, and machine learning engineer — and the lead dev behind **SchoolMod** — a project built to enhance and mod the school experience. I enjoy poking at systems, writing code, and building tools that push boundaries.
 
 * 🚀  I'm currently working on [SchoolMod](https://github.com/ZDStudios/SchoolMod)
+* 🤖  Machine learning engineer — building and training models, working with data pipelines, and deploying AI systems
 * 🔐  I enjoy CTFs, security research, and finding out how things work under the hood
-* 🤝  Open to collaborating on interesting mods, tools, and security projects
-* ✨  Always learning — currently deep in low-level programming and exploit development
+* 🤝  Open to collaborating on interesting mods, tools, security projects, and ML experiments
+* ✨  Always learning — currently deep in low-level programming, exploit development, and neural network architectures
 
 <br>
 
@@ -30,6 +31,8 @@ I'm a developer, hacker, and the lead dev behind **SchoolMod** — a project bui
 <a href="https://developer.mozilla.org/en-US/docs/Glossary/HTML5" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/html5-colored.svg" width="36" height="36" alt="HTML5" /></a>
 <a href="https://www.w3.org/TR/CSS/#css" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/css3-colored.svg" width="36" height="36" alt="CSS3" /></a>
 <a href="https://nodejs.org/en/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/nodejs-colored.svg" width="36" height="36" alt="NodeJS" /></a>
+<a href="https://www.tensorflow.org/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/tensorflow-colored.svg" width="36" height="36" alt="TensorFlow" /></a>
+<a href="https://pytorch.org/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/pytorch-colored.svg" width="36" height="36" alt="PyTorch" /></a>
 <a href="https://www.linux.org" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/linux-colored.svg" width="36" height="36" alt="Linux" /></a>
 <a href="https://www.docker.com/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/docker-colored.svg" width="36" height="36" alt="Docker" /></a>
 </p>
