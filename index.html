@@ -1,1 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ZDStudios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────
+   Catppuccin Mocha — full palette
+───────────────────────────────────────────── */
+:root {
+  --crust:    #11111b;
+  --mantle:   #181825;
+  --base:     #1e1e2e;
+  --surface0: #313244;
+  --surface1: #45475a;
+  --surface2: #585b70;
+  --overlay0: #6c7086;
+  --overlay1: #7f849c;
+  --overlay2: #9399b2;
+  --subtext0: #a6adc8;
+  --subtext1: #bac2de;
+  --text:     #cdd6f4;
+  --lavender: #b4befe;
+  --blue:     #89b4fa;
+  --sapphire: #74c7ec;
+  --sky:      #89dceb;
+  --teal:     #94e2d5;
+  --green:    #a6e3a1;
+  --yellow:   #f9e2af;
+  --peach:    #fab387;
+  --maroon:   #eba0ac;
+  --red:      #f38ba8;
+  --mauve:    #cba6f7;
+  --pink:     #f5c2e7;
+  --flamingo: #f2cdcd;
+  --rosewater:#f5e0dc;
+}
 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--crust);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── noise grain overlay ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ─────────────────────────────────────────────
+   BACKGROUND — catppuccin colour wash
+───────────────────────────────────────────── */
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  mix-blend-mode: screen;
+}
+.orb-a { width: 700px; height: 700px; background: var(--mauve);    top: -200px;  right: -180px;  opacity: .12; animation: breathe 14s ease-in-out infinite alternate; }
+.orb-b { width: 500px; height: 500px; background: var(--blue);     bottom: -80px; left: -120px;   opacity: .10; animation: breathe 18s ease-in-out infinite alternate-reverse; }
+.orb-c { width: 350px; height: 350px; background: var(--teal);     top: 45%;     left: 38%;       opacity: .08; animation: breathe 22s ease-in-out infinite alternate; }
+.orb-d { width: 260px; height: 260px; background: var(--pink);     top: 20%;     left: 10%;       opacity: .07; animation: breathe 16s ease-in-out infinite alternate-reverse; }
+.orb-e { width: 200px; height: 200px; background: var(--peach);    bottom: 25%;  right: 8%;       opacity: .06; animation: breathe 20s ease-in-out infinite alternate; }
+
+@keyframes breathe {
+  from { transform: scale(1)   translate(0,0); }
+  to   { transform: scale(1.1) translate(20px, 15px); }
+}
+
+/* dots grid */
+.bg-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--surface1) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: .18;
+}
+
+/* ─────────────────────────────────────────────
+   NAV
+───────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 52px;
+  background: rgba(17,17,27,.75);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--surface0);
+}
+
+.nav-wordmark {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: -.04em;
+  color: var(--mauve);
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 0;
+}
+.nav-links li a {
+  display: block;
+  padding: 6px 14px;
+  color: var(--overlay2);
+  text-decoration: none;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  transition: color .2s, background .2s;
+}
+.nav-links li a:hover {
+  color: var(--text);
+  background: var(--surface0);
+}
+
+/* ─────────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────────── */
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 32px 100px;
+}
+
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 60px;
+  align-items: center;
+  padding: 96px 0 72px;
+}
+
+.hero-eyebrow {
+  font-size: .7rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--teal);
+}
+
+.hero-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(3rem, 6.5vw, 5.2rem);
+  font-weight: 800;
+  line-height: .95;
+  letter-spacing: -.05em;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.hero-name-accent {
+  display: block;
+  background: linear-gradient(100deg, var(--mauve) 0%, var(--blue) 40%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 6s ease infinite alternate;
+  background-size: 200%;
+}
+@keyframes gradient-shift {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+.hero-role {
+  font-size: .78rem;
+  color: var(--overlay2);
+  margin-bottom: 28px;
+  padding-left: 2px;
+}
+
+.hero-desc {
+  font-size: .82rem;
+  color: var(--subtext0);
+  line-height: 1.85;
+  max-width: 500px;
+  margin-bottom: 36px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hero-desc mark {
+  background: none;
+  color: var(--peach);
+}
+
+.hero-desc .hl-mauve { color: var(--mauve); }
+.hero-desc .hl-blue  { color: var(--blue);  }
+.hero-desc .hl-green { color: var(--green); }
+
+/* ── pill tags ── */
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 36px;
+}
+
+.tag {
+  font-size: .68rem;
+  font-weight: 500;
+  padding: 4px 11px;
+  border-radius: 4px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  opacity: .8;
+  transition: opacity .2s;
+}
+.tag:hover { opacity: 1; }
+.tag-mauve   { color: var(--mauve);   }
+.tag-blue    { color: var(--blue);    }
+.tag-teal    { color: var(--teal);    }
+.tag-peach   { color: var(--peach);   }
+.tag-green   { color: var(--green);   }
+.tag-red     { color: var(--red);     }
+.tag-yellow  { color: var(--yellow);  }
+.tag-lavender{ color: var(--lavender);}
+
+/* ── CTA buttons ── */
+.hero-cta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s, filter .15s;
+}
+.btn:hover { transform: translateY(-2px); }
+
+.btn-mauve {
+  background: var(--mauve);
+  color: var(--crust);
+  box-shadow: 0 0 0 0 rgba(203,166,247,0);
+}
+.btn-mauve:hover { box-shadow: 0 6px 28px rgba(203,166,247,.35); filter: brightness(1.08); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--subtext1);
+  border: 1px solid var(--surface1);
+}
+.btn-outline:hover { border-color: var(--surface2); color: var(--text); background: var(--surface0); }
+
+/* ── avatar ── */
+.avatar-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-frame {
+  position: relative;
+  width: 168px;
+  height: 168px;
+}
+
+.avatar-halo {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--mauve) 0deg,
+    var(--blue) 72deg,
+    var(--teal) 144deg,
+    var(--green) 216deg,
+    var(--pink) 288deg,
+    var(--mauve) 360deg
+  );
+  animation: spin 8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.avatar-inner {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--crust);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-inner img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--surface0), var(--surface1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--mauve);
+}
+
+/* ─────────────────────────────────────────────
+   SECTION HEADERS
+───────────────────────────────────────────── */
+.section-head {
+  margin-bottom: 28px;
+}
+
+.section-kicker {
+  font-size: .65rem;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--overlay1);
+  margin-bottom: 6px;
+}
+
+.section-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.section-title span { color: var(--mauve); }
+
+/* ─────────────────────────────────────────────
+   DIVIDER
+───────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  margin: 64px 0;
+  background: linear-gradient(90deg,
+    transparent,
+    var(--surface1) 20%,
+    var(--mauve) 50%,
+    var(--surface1) 80%,
+    transparent
+  );
+  opacity: .4;
+}
+
+/* ─────────────────────────────────────────────
+   STATS GRID
+───────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat {
+  background: var(--mantle);
+  border: 1px solid var(--surface0);
+  border-radius: 10px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.stat:hover {
+  border-color: var(--surface2);
+  transform: translateY(-3px);
+}
+
+/* colour-coded left bar */
+.stat::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 10px 0 0 10px;
+  background: var(--stat-color);
+}
+
+.stat-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--stat-color);
+  margin-bottom: 4px;
+}
+
+.stat-desc {
+  font-size: .68rem;
+  color: var(--subtext0);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.s-mauve  { --stat-color: var(--mauve); }
+.s-blue   { --stat-color: var(--blue); }
+.s-green  { --stat-color: var(--green); }
+.s-peach  { --stat-color: var(--peach); }
+.s-teal   { --stat-color: var(--teal); }
+.s-pink   { --stat-color: var(--pink); }
+
+/* ─────────────────────────────────────────────
+   PROJECTS
+───────────────────────────────────────────── */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .projects-grid { grid-template-columns: 1fr; }
+}
+
+.project {
+  background: var(--mantle);
+  border: 1px solid var(--surface0);
+  border-radius: 10px;
+  padding: 22px 24px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.project::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(203,166,247,.04));
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+
+.project:hover {
+  border-color: var(--mauve);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,.4);
+}
+.project:hover::after { opacity: 1; }
+
+.project-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.project-arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--overlay1);
+  transition: color .2s, transform .2s;
+  flex-shrink: 0;
+}
+.project:hover .project-arrow {
+  color: var(--mauve);
+  transform: translate(2px, -2px);
+}
+
+.project-desc {
+  font-size: .76rem;
+  color: var(--subtext0);
+  line-height: 1.7;
+  flex: 1;
+}
+
+.project-foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface0);
+  font-size: .68rem;
+  color: var(--overlay1);
+}
+
+.lang-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.lang-dot::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--lang-col);
+}
+.lang-python  { --lang-col: #3572A5; }
+.lang-js      { --lang-col: #f1e05a; }
+.lang-html    { --lang-col: #e34c26; }
+
+.star-count {
+  margin-left: auto;
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────
+   ACHIEVEMENTS
+───────────────────────────────────────────── */
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 600px) { .ach-grid { grid-template-columns: 1fr; } }
+
+.ach {
+  background: var(--mantle);
+  border: 1px solid var(--surface0);
+  border-radius: 10px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color .2s, transform .2s;
+}
+.ach:hover {
+  border-color: var(--yellow);
+  transform: translateY(-3px);
+}
+
+.ach-icon-wrap {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--surface0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.ach-icon-wrap svg {
+  width: 18px; height: 18px;
+}
+
+.ach-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--text);
+}
+.ach-sub {
+  font-size: .7rem;
+  color: var(--subtext0);
+}
+
+/* ─────────────────────────────────────────────
+   SKILLS
+───────────────────────────────────────────── */
+.skills-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill {
+  font-size: .72rem;
+  font-weight: 500;
+  padding: 6px 13px;
+  border-radius: 6px;
+  background: var(--mantle);
+  border: 1px solid var(--surface0);
+  color: var(--subtext1);
+  letter-spacing: .04em;
+  transition: all .18s;
+  cursor: default;
+}
+.skill:hover {
+  color: var(--text);
+  background: var(--surface0);
+  border-color: var(--surface1);
+  transform: translateY(-2px);
+}
+
+/* individual colour tints on hover via data-col */
+.skill[data-c="mauve"]:hover  { border-color: var(--mauve);   color: var(--mauve);  background: rgba(203,166,247,.08); }
+.skill[data-c="blue"]:hover   { border-color: var(--blue);    color: var(--blue);   background: rgba(137,180,250,.08); }
+.skill[data-c="teal"]:hover   { border-color: var(--teal);    color: var(--teal);   background: rgba(148,226,213,.08); }
+.skill[data-c="green"]:hover  { border-color: var(--green);   color: var(--green);  background: rgba(166,227,161,.08); }
+.skill[data-c="peach"]:hover  { border-color: var(--peach);   color: var(--peach);  background: rgba(250,179,135,.08); }
+.skill[data-c="red"]:hover    { border-color: var(--red);     color: var(--red);    background: rgba(243,139,168,.08); }
+.skill[data-c="sky"]:hover    { border-color: var(--sky);     color: var(--sky);    background: rgba(137,220,235,.08); }
+.skill[data-c="yellow"]:hover { border-color: var(--yellow);  color: var(--yellow); background: rgba(249,226,175,.08); }
+
+/* ─────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────── */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--surface0);
+  padding: 28px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: .68rem;
+  color: var(--overlay0);
+}
+
+footer a {
+  color: var(--mauve);
+  text-decoration: none;
+  transition: color .2s;
+}
+footer a:hover { color: var(--lavender); }
+
+.footer-palette {
+  display: flex;
+  gap: 5px;
+}
+
+.palette-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  transition: transform .2s;
+}
+.palette-dot:hover { transform: scale(1.4); }
+
+/* ─────────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────────── */
+.fade {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: fadeUp .55s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+.d0  { animation-delay: .05s; }
+.d1  { animation-delay: .12s; }
+.d2  { animation-delay: .20s; }
+.d3  { animation-delay: .28s; }
+.d4  { animation-delay: .36s; }
+.d5  { animation-delay: .44s; }
+
+/* cursor blink */
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: .9em;
+  background: var(--mauve);
+  vertical-align: text-bottom;
+  margin-left: 4px;
+  animation: blink .9s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+@media (max-width: 700px) {
+  .hero { grid-template-columns: 1fr; }
+  .avatar-col { display: none; }
+  nav { padding: 0 20px; }
+  .page { padding: 0 20px 80px; }
+}
+</style>
+</head>
+<body>
+
+<!-- background -->
+<div class="bg-layer">
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <div class="bg-orb orb-c"></div>
+  <div class="bg-orb orb-d"></div>
+  <div class="bg-orb orb-e"></div>
+</div>
+
+<!-- nav -->
+<nav>
+  <div class="nav-wordmark">ZDStudios</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#stats">Stats</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <!-- ── HERO ── -->
+  <section id="about" class="hero">
+    <div>
+      <p class="hero-eyebrow fade d0">hacker · coder · ml engineer</p>
+      <h1 class="hero-name fade d1">
+        ZD<span class="hero-name-accent">Studios<span class="cursor"></span></span>
+      </h1>
+      <p class="hero-role fade d2">lead dev @ SchoolMod &mdash; pushing systems to their limits</p>
+
+      <p class="hero-desc fade d3">
+        Developer, <span class="hl-mauve">hacker</span>, and
+        <span class="hl-blue">ML engineer</span> who enjoys poking at systems,
+        writing code that matters, and building tools that
+        <span class="hl-green">push boundaries</span>.
+        Currently deep in low-level programming and
+        <mark>neural network architectures</mark>.
+      </p>
+
+      <div class="tag-row fade d3">
+        <span class="tag tag-mauve">ML Engineering</span>
+        <span class="tag tag-red">CTF / Security</span>
+        <span class="tag tag-blue">SchoolMod</span>
+        <span class="tag tag-teal">Low-Level</span>
+        <span class="tag tag-yellow">Neural Nets</span>
+        <span class="tag tag-green">Linux</span>
+        <span class="tag tag-lavender">Exploit Dev</span>
+        <span class="tag tag-peach">Data Pipelines</span>
+      </div>
+
+      <div class="hero-cta fade d4">
+        <a class="btn btn-mauve" href="https://github.com/ZDStudios" target="_blank">
+          <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+          View GitHub
+        </a>
+        <a class="btn btn-outline" href="https://github.com/ZDStudios/SchoolMod" target="_blank">SchoolMod</a>
+        <a class="btn btn-outline" href="https://github.com/ZDStudios/Kismet-OS" target="_blank">Kismet-OS</a>
+      </div>
+    </div>
+
+    <div class="avatar-col fade d4">
+      <div class="avatar-frame">
+        <div class="avatar-halo"></div>
+        <div class="avatar-inner">
+          <div class="avatar-placeholder" id="av-placeholder">ZD</div>
+          <img id="avatar-img" src="" alt="ZDStudios" style="display:none"/>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── STATS ── -->
+  <section id="stats">
+    <div class="section-head" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <p class="section-kicker">by the numbers</p>
+        <h2 class="section-title">GitHub <span>Stats</span></h2>
+      </div>
+      <span id="last-updated" style="font-size:.65rem;color:var(--overlay1);letter-spacing:.06em;padding-bottom:4px;">fetching live data…</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat s-mauve fade d1">
+        <div class="stat-num" id="stat-repos">—</div>
+        <div class="stat-desc">Repositories</div>
+      </div>
+      <div class="stat s-blue fade d2">
+        <div class="stat-num" id="stat-stars">—</div>
+        <div class="stat-desc">Stars Received</div>
+      </div>
+      <div class="stat s-teal fade d3">
+        <div class="stat-num" id="stat-followers">—</div>
+        <div class="stat-desc">Followers</div>
+      </div>
+      <div class="stat s-green fade d1">
+        <div class="stat-num" id="stat-following">—</div>
+        <div class="stat-desc">Following</div>
+      </div>
+      <div class="stat s-peach fade d2">
+        <div class="stat-num" id="stat-gists">—</div>
+        <div class="stat-desc">Public Gists</div>
+      </div>
+      <div class="stat s-pink fade d2">
+        <div class="stat-num">3</div>
+        <div class="stat-desc">Achievements</div>
+      </div>
+      <div class="stat s-pink fade d3">
+        <div class="stat-num" style="font-size:1.6rem">CTFs</div>
+        <div class="stat-desc">Security Research</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── ACHIEVEMENTS ── -->
+  <section id="achievements">
+    <div class="section-head">
+      <p class="section-kicker">earned</p>
+      <h2 class="section-title">GitHub <span>Achievements</span></h2>
+    </div>
+    <div class="ach-grid">
+      <div class="ach fade d1">
+        <div class="ach-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+          </svg>
+        </div>
+        <div class="ach-name">Pull Shark</div>
+        <div class="ach-sub">Merged pull requests</div>
+      </div>
+      <div class="ach fade d2">
+        <div class="ach-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="var(--yellow)" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+          </svg>
+        </div>
+        <div class="ach-name">YOLO</div>
+        <div class="ach-sub">Merged without review</div>
+      </div>
+      <div class="ach fade d3">
+        <div class="ach-icon-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+          </svg>
+        </div>
+        <div class="ach-name">Quickdraw</div>
+        <div class="ach-sub">Lightning fast closes</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── PROJECTS ── -->
+  <section id="projects">
+    <div class="section-head">
+      <p class="section-kicker">pinned repos</p>
+      <h2 class="section-title">Featured <span>Projects</span></h2>
+    </div>
+    <div class="projects-grid">
+
+      <a class="project fade d1" href="https://github.com/ZDStudios/SchoolMod" target="_blank">
+        <div class="project-name">
+          SchoolMod
+          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+        </div>
+        <p class="project-desc">Open-source browser extension that enhances popular school platforms with features, QoL improvements, and powerful integrations — all in one place.</p>
+        <div class="project-foot">
+          <span class="lang-dot lang-html">HTML</span>
+          <span class="star-count">★ 1</span>
+        </div>
+      </a>
+
+      <a class="project fade d2" href="https://github.com/ZDStudios/Kismet-OS" target="_blank">
+        <div class="project-name">
+          Kismet-OS
+          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+        </div>
+        <p class="project-desc">AI-native operating system with a kernel-level agent that evolves with your habits to autonomously manage hardware, files, and tasks.</p>
+        <div class="project-foot">
+          <span class="lang-dot lang-python">Python</span>
+          <span class="star-count">★ 2</span>
+        </div>
+      </a>
+
+      <a class="project fade d3" href="https://github.com/ZDStudios/AMMOS" target="_blank">
+        <div class="project-name">
+          AMMOS
+          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+        </div>
+        <p class="project-desc">Automatic Minecraft Modding Operating Server — streamlines and automates Minecraft server mod workflows.</p>
+        <div class="project-foot">
+          <span class="lang-dot lang-js">JavaScript</span>
+          <span class="star-count">★ 1</span>
+        </div>
+      </a>
+
+      <a class="project fade d4" href="https://github.com/ZDStudios/Nabu" target="_blank">
+        <div class="project-name">
+          Nabu
+          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+        </div>
+        <p class="project-desc">A powerful LLM model built like Tony Stark's JARVIS — a personal AI assistant with real capability.</p>
+        <div class="project-foot">
+          <span class="lang-dot lang-html">HTML</span>
+          <span class="star-count">★ —</span>
+        </div>
+      </a>
+
+      <a class="project fade d2" href="https://github.com/ZDStudios/TAUMSS" target="_blank">
+        <div class="project-name">
+          TAUMSS
+          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+        </div>
+        <p class="project-desc">The Auto Update Minecraft Server Script — keeps your server updated without lifting a finger.</p>
+        <div class="project-foot">
+          <span class="lang-dot lang-python">Python</span>
+          <span class="star-count">★ —</span>
+        </div>
+      </a>
+
+      <a class="project fade d3" href="https://github.com/ZDStudios/Imposter-Who-Game" target="_blank">
+        <div class="project-name">
+          Imposter-Who Game
+          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+        </div>
+        <p class="project-desc">Someone's the imposter — you have to figure out who. A social deduction game built in HTML.</p>
+        <div class="project-foot">
+          <span class="lang-dot lang-html">HTML</span>
+          <span class="star-count">★ 1</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── SKILLS ── -->
+  <section id="skills">
+    <div class="section-head">
+      <p class="section-kicker">stack</p>
+      <h2 class="section-title">Skills &amp; <span>Tools</span></h2>
+    </div>
+    <div class="skills-block">
+      <span class="skill" data-c="blue">Python</span>
+      <span class="skill" data-c="yellow">JavaScript</span>
+      <span class="skill" data-c="blue">TypeScript</span>
+      <span class="skill" data-c="peach">HTML</span>
+      <span class="skill" data-c="mauve">CSS</span>
+      <span class="skill" data-c="green">Node.js</span>
+      <span class="skill" data-c="red">Git</span>
+      <span class="skill" data-c="teal">Bash</span>
+      <span class="skill" data-c="green">Linux</span>
+      <span class="skill" data-c="sky">Docker</span>
+      <span class="skill" data-c="blue">TensorFlow</span>
+      <span class="skill" data-c="peach">PyTorch</span>
+      <span class="skill" data-c="mauve">VS Code</span>
+    </div>
+  </section>
+
+</div>
+
+<!-- footer -->
+<footer>
+  <span>ZDStudios &mdash; <a href="https://github.com/ZDStudios" target="_blank">github.com/ZDStudios</a></span>
+  <div class="footer-palette">
+    <div class="palette-dot" style="background:var(--red)"      title="red"></div>
+    <div class="palette-dot" style="background:var(--peach)"    title="peach"></div>
+    <div class="palette-dot" style="background:var(--yellow)"   title="yellow"></div>
+    <div class="palette-dot" style="background:var(--green)"    title="green"></div>
+    <div class="palette-dot" style="background:var(--teal)"     title="teal"></div>
+    <div class="palette-dot" style="background:var(--sky)"      title="sky"></div>
+    <div class="palette-dot" style="background:var(--sapphire)" title="sapphire"></div>
+    <div class="palette-dot" style="background:var(--blue)"     title="blue"></div>
+    <div class="palette-dot" style="background:var(--lavender)" title="lavender"></div>
+    <div class="palette-dot" style="background:var(--mauve)"    title="mauve"></div>
+    <div class="palette-dot" style="background:var(--pink)"     title="pink"></div>
+    <div class="palette-dot" style="background:var(--flamingo)" title="flamingo"></div>
+    <div class="palette-dot" style="background:var(--rosewater)"title="rosewater"></div>
+  </div>
+  <span style="color:var(--overlay0)">catppuccin mocha</span>
+</footer>
+
+<script>
+  // ── known fallback stats (used if API is blocked, e.g. in sandboxed previews) ──
+  const FALLBACK = {
+    'stat-repos':     160,
+    'stat-stars':     5,
+    'stat-followers': 7,
+    'stat-following': 13,
+    'stat-gists':     0,
+  };
+
+  // ── avatar: set src directly — browsers load cross-origin images fine,
+  //    it's only fetch() that gets blocked in sandboxed iframes ──────
+  function loadAvatar(url) {
+    const img = document.getElementById('avatar-img');
+    const ph  = document.getElementById('av-placeholder');
+    img.onload  = () => { img.style.display = 'block'; ph.style.display = 'none'; };
+    img.onerror = () => { img.style.display = 'none';  ph.style.display = 'flex'; };
+    // append a cache-bust param so the browser doesn't serve a stale 404
+    img.src = url;
+  }
+
+  // always try to show the avatar immediately using the known URL pattern
+  loadAvatar('https://avatars.githubusercontent.com/u/121779558?v=4&s=200');
+
+  // ── count-up animation ──────────────────────────────────────────
+  function countUp(el, target, duration = 900) {
+    if (typeof target !== 'number' || isNaN(target)) { el.textContent = target; return; }
+    el.style.opacity = '1';
+    const start = performance.now();
+    function step(now) {
+      const p    = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * ease);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function applyStats(data, source) {
+    Object.entries(data).forEach(([id, val], i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      setTimeout(() => countUp(el, val), i * 80);
+    });
+    const badge = document.getElementById('last-updated');
+    if (badge) badge.textContent = source === 'live'
+      ? 'live · updated ' + new Date().toLocaleTimeString()
+      : 'open in browser for live stats';
+  }
+
+  // dim stats while loading
+  document.querySelectorAll('[id^="stat-"]').forEach(el => el.style.opacity = '0.3');
+
+  // ── try GitHub API; fall back gracefully if blocked ──────────────
+  async function loadGitHub() {
+    try {
+      const [userRes, reposRes] = await Promise.all([
+        fetch('https://api.github.com/users/ZDStudios'),
+        fetch('https://api.github.com/users/ZDStudios/repos?per_page=100')
+      ]);
+      if (!userRes.ok) throw new Error('API blocked');
+
+      const user  = await userRes.json();
+      const repos = await reposRes.json();
+
+      // if API returns a fresh avatar URL, use it
+      if (user.avatar_url) loadAvatar(user.avatar_url);
+
+      const totalStars = Array.isArray(repos)
+        ? repos.reduce((acc, r) => acc + (r.stargazers_count || 0), 0)
+        : FALLBACK['stat-stars'];
+
+      applyStats({
+        'stat-repos':     user.public_repos,
+        'stat-stars':     totalStars,
+        'stat-followers': user.followers,
+        'stat-following': user.following,
+        'stat-gists':     user.public_gists,
+      }, 'live');
+
+    } catch (_) {
+      // sandbox / CORS block — show known numbers with a note
+      applyStats(FALLBACK, 'fallback');
+    }
+  }
+
+  loadGitHub();
+  setInterval(loadGitHub, 60_000);
+</script>
+</body>
+</html>
