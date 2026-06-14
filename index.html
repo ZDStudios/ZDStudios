@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ZDStudios</title>
+<link id="favicon" rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/121779558?v=4&s=32"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet"/>
@@ -554,6 +555,20 @@ nav {
   color: var(--overlay1);
 }
 
+/* ── skeleton loader ── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.project-skeleton {
+  height: 160px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--mantle) 25%, var(--surface0) 50%, var(--mantle) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border: 1px solid var(--surface0);
+}
+
 .lang-dot {
   display: inline-flex;
   align-items: center;
@@ -832,7 +847,7 @@ footer a:hover { color: var(--lavender); }
       </div>
       <div class="stat s-blue fade d2">
         <div class="stat-num" id="stat-stars">—</div>
-        <div class="stat-desc">Stars Received</div>
+        <div class="stat-desc">Stars Given</div>
       </div>
       <div class="stat s-teal fade d3">
         <div class="stat-num" id="stat-followers">—</div>
@@ -900,84 +915,21 @@ footer a:hover { color: var(--lavender); }
 
   <!-- ── PROJECTS ── -->
   <section id="projects">
-    <div class="section-head">
-      <p class="section-kicker">pinned repos</p>
-      <h2 class="section-title">Featured <span>Projects</span></h2>
+    <div class="section-head" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div>
+        <p class="section-kicker">top repos</p>
+        <h2 class="section-title">Featured <span>Projects</span></h2>
+      </div>
+      <span id="repos-updated" style="font-size:.65rem;color:var(--overlay1);letter-spacing:.06em;padding-bottom:4px;">fetching live data…</span>
     </div>
-    <div class="projects-grid">
-
-      <a class="project fade d1" href="https://github.com/ZDStudios/SchoolMod" target="_blank">
-        <div class="project-name">
-          SchoolMod
-          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
-        </div>
-        <p class="project-desc">Open-source browser extension that enhances popular school platforms with features, QoL improvements, and powerful integrations — all in one place.</p>
-        <div class="project-foot">
-          <span class="lang-dot lang-html">HTML</span>
-          <span class="star-count">★ 1</span>
-        </div>
-      </a>
-
-      <a class="project fade d2" href="https://github.com/ZDStudios/Kismet-OS" target="_blank">
-        <div class="project-name">
-          Kismet-OS
-          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
-        </div>
-        <p class="project-desc">AI-native operating system with a kernel-level agent that evolves with your habits to autonomously manage hardware, files, and tasks.</p>
-        <div class="project-foot">
-          <span class="lang-dot lang-python">Python</span>
-          <span class="star-count">★ 2</span>
-        </div>
-      </a>
-
-      <a class="project fade d3" href="https://github.com/ZDStudios/AMMOS" target="_blank">
-        <div class="project-name">
-          AMMOS
-          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
-        </div>
-        <p class="project-desc">Automatic Minecraft Modding Operating Server — streamlines and automates Minecraft server mod workflows.</p>
-        <div class="project-foot">
-          <span class="lang-dot lang-js">JavaScript</span>
-          <span class="star-count">★ 1</span>
-        </div>
-      </a>
-
-      <a class="project fade d4" href="https://github.com/ZDStudios/Nabu" target="_blank">
-        <div class="project-name">
-          Nabu
-          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
-        </div>
-        <p class="project-desc">A powerful LLM model built like Tony Stark's JARVIS — a personal AI assistant with real capability.</p>
-        <div class="project-foot">
-          <span class="lang-dot lang-html">HTML</span>
-          <span class="star-count">★ —</span>
-        </div>
-      </a>
-
-      <a class="project fade d2" href="https://github.com/ZDStudios/TAUMSS" target="_blank">
-        <div class="project-name">
-          TAUMSS
-          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
-        </div>
-        <p class="project-desc">The Auto Update Minecraft Server Script — keeps your server updated without lifting a finger.</p>
-        <div class="project-foot">
-          <span class="lang-dot lang-python">Python</span>
-          <span class="star-count">★ —</span>
-        </div>
-      </a>
-
-      <a class="project fade d3" href="https://github.com/ZDStudios/Imposter-Who-Game" target="_blank">
-        <div class="project-name">
-          Imposter-Who Game
-          <svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
-        </div>
-        <p class="project-desc">Someone's the imposter — you have to figure out who. A social deduction game built in HTML.</p>
-        <div class="project-foot">
-          <span class="lang-dot lang-html">HTML</span>
-          <span class="star-count">★ 1</span>
-        </div>
-      </a>
-
+    <div class="projects-grid" id="projects-grid">
+      <!-- skeleton cards shown while loading -->
+      <div class="project-skeleton"></div>
+      <div class="project-skeleton"></div>
+      <div class="project-skeleton"></div>
+      <div class="project-skeleton"></div>
+      <div class="project-skeleton"></div>
+      <div class="project-skeleton"></div>
     </div>
   </section>
 
@@ -1030,93 +982,168 @@ footer a:hover { color: var(--lavender); }
 </footer>
 
 <script>
-  // ── known fallback stats (used if API is blocked, e.g. in sandboxed previews) ──
-  const FALLBACK = {
-    'stat-repos':     160,
-    'stat-stars':     5,
-    'stat-followers': 7,
-    'stat-following': 13,
-    'stat-gists':     0,
+  // ─────────────────────────────────────────────────────────────────
+  // CONFIG
+  // ─────────────────────────────────────────────────────────────────
+  const PINNED_NAMES = [
+    'SchoolMod', 'Kismet-OS', 'AMMOS', 'TAUMSS', 'Seqta-MCP-Server', 'Claude-Games'
+  ];
+
+  const FALLBACK_REPOS = [
+    { name:'SchoolMod',        html_url:'https://github.com/ZDStudios/SchoolMod',        description:'Open-source browser extension that enhances popular school platforms with new features, quality-of-life improvements, and powerful integrations — all in one place.', language:'HTML',       stargazers_count:1, forks_count:0, updated_at:'2025-01-01' },
+    { name:'Kismet-OS',        html_url:'https://github.com/ZDStudios/Kismet-OS',        description:'AI-native operating system with a kernel-level agent that evolves with your habits to autonomously manage your hardware, files, and tasks.',                         language:'Python',     stargazers_count:2, forks_count:0, updated_at:'2025-01-01' },
+    { name:'AMMOS',            html_url:'https://github.com/ZDStudios/AMMOS',            description:'Automatic Minecraft Modding Operating Server.',                                                                                                                      language:'JavaScript', stargazers_count:1, forks_count:0, updated_at:'2025-01-01' },
+    { name:'TAUMSS',           html_url:'https://github.com/ZDStudios/TAUMSS',           description:'The Auto Update Minecraft Server Script.',                                                                                                                           language:'Python',     stargazers_count:0, forks_count:0, updated_at:'2025-01-01' },
+    { name:'Seqta-MCP-Server', html_url:'https://github.com/ZDStudios/Seqta-MCP-Server', description:'MCP server for SEQTA — connects AI assistants to the SEQTA learning management platform.',                                                                         language:'JavaScript', stargazers_count:0, forks_count:0, updated_at:'2025-01-01' },
+    { name:'Claude-Games',     html_url:'https://github.com/ZDStudios/Claude-Games',     description:'A collection of games built with and for Claude.',                                                                                                                   language:'HTML',       stargazers_count:0, forks_count:0, updated_at:'2025-01-01' },
+  ];
+
+  // Known-correct values from your profile — shown instantly on load
+  const KNOWN = { repos:160, stars:57, followers:7, following:13, gists:0 };
+
+  const LANG_COLORS = {
+    Python:'#3572A5', JavaScript:'#f1e05a', TypeScript:'#2b7489',
+    HTML:'#e34c26', CSS:'#563d7c', Shell:'#89e051',
+    Rust:'#dea584', C:'#555555', 'C++':'#f34b7d', Go:'#00ADD8',
   };
 
-  // ── avatar: set src directly — browsers load cross-origin images fine,
-  //    it's only fetch() that gets blocked in sandboxed iframes ──────
+  const ARROW = `<svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>`;
+
+  // ── AVATAR ───────────────────────────────────────────────────────
+  // Uses img.src (not fetch) so cross-origin images load fine everywhere
   function loadAvatar(url) {
     const img = document.getElementById('avatar-img');
     const ph  = document.getElementById('av-placeholder');
-    img.onload  = () => { img.style.display = 'block'; ph.style.display = 'none'; };
-    img.onerror = () => { img.style.display = 'none';  ph.style.display = 'flex'; };
-    // append a cache-bust param so the browser doesn't serve a stale 404
-    img.src = url;
+    if (!img) return;
+    const probe = new Image();
+    probe.onload = () => {
+      img.src = probe.src;
+      img.style.display = 'block';
+      if (ph) ph.style.display = 'none';
+    };
+    probe.src = url;
   }
 
-  // always try to show the avatar immediately using the known URL pattern
+  // Show avatar immediately from known URL — no waiting for API
   loadAvatar('https://avatars.githubusercontent.com/u/121779558?v=4&s=200');
 
-  // ── count-up animation ──────────────────────────────────────────
-  function countUp(el, target, duration = 900) {
-    if (typeof target !== 'number' || isNaN(target)) { el.textContent = target; return; }
-    el.style.opacity = '1';
+  // ── STATS — shown instantly from KNOWN, then silently updated ────
+  // Write directly without animation first (no flash/opacity tricks)
+  function setStatEl(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+  }
+
+  function animateStat(id, target, duration = 800) {
+    const el = document.getElementById(id);
+    if (!el || typeof target !== 'number') return;
     const start = performance.now();
-    function step(now) {
-      const p    = Math.min((now - start) / duration, 1);
+    const from  = parseInt(el.textContent) || 0;
+    if (from === target) return; // no change, no animation
+    (function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
       const ease = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.round(target * ease);
-      if (p < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
+      el.textContent = Math.round(from + (target - from) * ease);
+      if (p < 1) requestAnimationFrame(tick);
+    })(start);
   }
 
-  function applyStats(data, source) {
-    Object.entries(data).forEach(([id, val], i) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      setTimeout(() => countUp(el, val), i * 80);
-    });
-    const badge = document.getElementById('last-updated');
-    if (badge) badge.textContent = source === 'live'
-      ? 'live · updated ' + new Date().toLocaleTimeString()
-      : 'open in browser for live stats';
+  // Paint known values immediately — zero flash
+  setStatEl('stat-repos',     KNOWN.repos);
+  setStatEl('stat-stars',     KNOWN.stars);
+  setStatEl('stat-followers', KNOWN.followers);
+  setStatEl('stat-following', KNOWN.following);
+  setStatEl('stat-gists',     KNOWN.gists);
+
+  // ── REPOS ────────────────────────────────────────────────────────
+  function renderRepos(repos, live) {
+    const grid = document.getElementById('projects-grid');
+    if (!grid) return;
+    const delays = ['d1','d2','d3','d4','d3','d2'];
+    grid.innerHTML = repos.map((r, i) => {
+      const lang    = r.language || 'Code';
+      const color   = LANG_COLORS[lang] || 'var(--overlay1)';
+      const stars   = r.stargazers_count || 0;
+      const forks   = r.forks_count || 0;
+      const raw     = r.description || 'No description yet.';
+      const desc    = raw.length > 115 ? raw.slice(0, 115) + '…' : raw;
+      const updated = new Date(r.updated_at).toLocaleDateString('en-AU', { month:'short', year:'numeric' });
+      return `<a class="project fade ${delays[i]}" href="${r.html_url}" target="_blank">
+        <div class="project-name">${r.name}${ARROW}</div>
+        <p class="project-desc">${desc}</p>
+        <div class="project-foot">
+          <span class="lang-dot" style="--lang-col:${color}">${lang}</span>
+          <span style="color:var(--yellow)">&#9733; ${stars}</span>
+          ${forks ? `<span style="color:var(--teal)">&#8918; ${forks}</span>` : ''}
+          <span style="margin-left:auto;color:var(--overlay1)">${updated}</span>
+        </div>
+      </a>`;
+    }).join('');
+    const b = document.getElementById('repos-updated');
+    if (b) b.textContent = live
+      ? 'live \u00b7 updated ' + new Date().toLocaleTimeString()
+      : 'open in browser for live data';
   }
 
-  // dim stats while loading
-  document.querySelectorAll('[id^="stat-"]').forEach(el => el.style.opacity = '0.3');
+  // Paint fallback repos immediately so grid is never blank
+  renderRepos(FALLBACK_REPOS, false);
 
-  // ── try GitHub API; fall back gracefully if blocked ──────────────
-  async function loadGitHub() {
+  // ── MAIN FETCH ───────────────────────────────────────────────────
+  async function syncGitHub() {
     try {
       const [userRes, reposRes] = await Promise.all([
         fetch('https://api.github.com/users/ZDStudios'),
-        fetch('https://api.github.com/users/ZDStudios/repos?per_page=100')
+        fetch('https://api.github.com/users/ZDStudios/repos?per_page=100&sort=pushed'),
       ]);
-      if (!userRes.ok) throw new Error('API blocked');
+      if (!userRes.ok) throw new Error('rate-limited or blocked');
 
       const user  = await userRes.json();
       const repos = await reposRes.json();
+      if (!Array.isArray(repos)) throw new Error('bad repos payload');
 
-      // if API returns a fresh avatar URL, use it
-      if (user.avatar_url) loadAvatar(user.avatar_url);
+      // Update avatar + favicon from freshest API URL
+      if (user.avatar_url) {
+        loadAvatar(user.avatar_url + '&s=200');
+        const fav = document.getElementById('favicon');
+        if (fav) fav.href = user.avatar_url + '&s=32';
+      }
 
-      const totalStars = Array.isArray(repos)
-        ? repos.reduce((acc, r) => acc + (r.stargazers_count || 0), 0)
-        : FALLBACK['stat-stars'];
+      // Smoothly animate only stats that actually changed
+      const totalStars = repos.reduce((n, r) => n + (r.stargazers_count || 0), 0);
+      animateStat('stat-repos',     user.public_repos);
+      animateStat('stat-followers', user.followers);
+      animateStat('stat-following', user.following);
+      animateStat('stat-gists',     user.public_gists);
+      // stars-given: use the known 57 since API doesn't expose it directly
+      // (user.public_repos starred count not in REST response)
+      animateStat('stat-stars', 57);
 
-      applyStats({
-        'stat-repos':     user.public_repos,
-        'stat-stars':     totalStars,
-        'stat-followers': user.followers,
-        'stat-following': user.following,
-        'stat-gists':     user.public_gists,
-      }, 'live');
+      // Update last-updated badge
+      const sb = document.getElementById('last-updated');
+      if (sb) sb.textContent = 'live \u00b7 updated ' + new Date().toLocaleTimeString();
 
-    } catch (_) {
-      // sandbox / CORS block — show known numbers with a note
-      applyStats(FALLBACK, 'fallback');
+      // Build name→repo map for O(1) lookup
+      const byName = {};
+      repos.forEach(r => { byName[r.name] = r; });
+
+      // Build pinned list in exact requested order
+      // If a repo isn't found in API (private / doesn't exist yet), keep fallback
+      const pinned = PINNED_NAMES.map((name, i) => byName[name] || FALLBACK_REPOS[i]);
+      renderRepos(pinned, true);
+
+    } catch (err) {
+      // API blocked (sandbox) or rate-limited — known values already painted, just update badge
+      const sb = document.getElementById('last-updated');
+      if (sb) sb.textContent = 'open in browser for live data';
+      const rb = document.getElementById('repos-updated');
+      if (rb) rb.textContent = 'open in browser for live data';
     }
   }
 
-  loadGitHub();
-  setInterval(loadGitHub, 60_000);
+  // Fetch live data — don't await so page doesn't wait on network
+  syncGitHub();
+  setInterval(syncGitHub, 60_000);
 </script>
 </body>
 </html>
