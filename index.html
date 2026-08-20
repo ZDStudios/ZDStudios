@@ -337,7 +337,7 @@ nav {
   position: absolute;
   inset: 3px;
   border-radius: 50%;
-  background: var(--crust);
+  background: transparent;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1296,6 +1296,13 @@ footer a:hover { color: var(--lavender); }
   const baseRGB = cssVarRGB('--surface1');
   const hotRGB  = cssVarRGB('--lavender');
 
+  // Deterministic per-dot pseudo-random value in [0,1), so every dot gets
+  // its own stable flicker phase/speed instead of a synced pulse.
+  function hash2(i, j) {
+    const n = Math.sin(i * 127.1 + j * 311.7) * 43758.5453;
+    return n - Math.floor(n);
+  }
+
   let mouse = null; // {x,y} in CSS px, or null when the mouse isn't hovering
   let dpr = Math.min(window.devicePixelRatio || 1, 2);
   let W = 0, H = 0;
@@ -1316,7 +1323,8 @@ footer a:hover { color: var(--lavender); }
   window.addEventListener('mousemove', (e) => { mouse = { x: e.clientX, y: e.clientY }; });
   window.addEventListener('mouseleave', () => { mouse = null; });
 
-  function draw() {
+  function draw(now) {
+    const t = (now || 0) / 1000; // seconds, for the flicker animation
     ctx.clearRect(0, 0, W, H);
     const cols = Math.ceil(W / SPACING) + 1;
     const rows = Math.ceil(H / SPACING) + 1;
@@ -1334,8 +1342,16 @@ footer a:hover { color: var(--lavender); }
           const dx = x - mouse.x, dy = y - mouse.y;
           const dist = Math.hypot(dx, dy);
           if (dist < REACT_R) {
-            const t = 1 - dist / REACT_R;
-            const eased = t * t;
+            const dt = 1 - dist / REACT_R;
+            let eased = dt * dt;
+
+            // slow, randomized flicker — each dot has its own phase and
+            // speed so lit-up dots fade in and out independently
+            const phase = hash2(i, j) * Math.PI * 2;
+            const speed = 0.4 + hash2(j, i) * 0.6; // ~0.4–1.0 rad/s (slow)
+            const flicker = 0.5 + 0.5 * Math.sin(t * speed + phase);
+            eased *= 0.25 + 0.75 * flicker; // never fully off, just dims
+
             r = BASE_R + eased * (HOT_R - BASE_R);
             a = BASE_A + eased * (HOT_A - BASE_A);
             color = [
