@@ -165,7 +165,7 @@ nav {
 ───────────────────────────────────────────── */
 .hero {
   display: grid;
-  grid-template-columns: 1fr 200px;
+  grid-template-columns: 1fr 280px;
   gap: 60px;
   align-items: center;
   padding: 96px 0 72px;
@@ -315,8 +315,8 @@ nav {
 
 .avatar-frame {
   position: relative;
-  width: 168px;
-  height: 168px;
+  width: 240px;
+  height: 240px;
 }
 
 .avatar-halo {
@@ -680,6 +680,50 @@ nav {
 .skill[data-c="yellow"]:hover { border-color: var(--yellow);  color: var(--yellow); background: rgba(249,226,175,.08); }
 
 /* ─────────────────────────────────────────────
+   MC CHARACTER VIEWER
+───────────────────────────────────────────── */
+.mc-viewer-frame {
+  position: relative;
+  height: 420px;
+  background: var(--mantle);
+  border: 1px solid var(--surface0);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.mc-viewer-frame canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+.mc-viewer-frame:active canvas { cursor: grabbing; }
+
+.mc-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--overlay1);
+}
+
+.mc-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: .65rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--overlay1);
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
    FOOTER
 ───────────────────────────────────────────── */
 footer {
@@ -748,6 +792,7 @@ footer a:hover { color: var(--lavender); }
   .avatar-col { display: none; }
   nav { padding: 0 20px; }
   .page { padding: 0 20px 80px; }
+  .mc-viewer-frame { height: 320px; }
 }
 </style>
 </head>
@@ -770,6 +815,7 @@ footer a:hover { color: var(--lavender); }
     <li><a href="#stats">Stats</a></li>
     <li><a href="#projects">Projects</a></li>
     <li><a href="#skills">Skills</a></li>
+    <li><a href="#mc-character">Character</a></li>
   </ul>
 </nav>
 
@@ -810,7 +856,7 @@ footer a:hover { color: var(--lavender); }
           View GitHub
         </a>
         <a class="btn btn-outline" href="https://github.com/ZDStudios/SchoolMod" target="_blank">SchoolMod</a>
-        <a class="btn btn-outline" href="https://github.com/ZDStudios/Kismet-OS" target="_blank">Kismet-OS</a>
+        <a class="btn btn-outline" href="https://github.com/ZDStudios/AIOS" target="_blank">AIOS</a>
         <a class="btn btn-outline" href="mailto:zdstudio12345@gmail.com">
           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
           Email
@@ -958,6 +1004,20 @@ footer a:hover { color: var(--lavender); }
     </div>
   </section>
 
+  <div class="divider"></div>
+
+  <!-- ── MC CHARACTER ── -->
+  <section id="mc-character">
+    <div class="section-head">
+      <p class="section-kicker">say hi</p>
+      <h2 class="section-title">MC <span>Character</span></h2>
+    </div>
+    <div class="mc-viewer-frame" id="mc-viewer">
+      <div class="mc-loading">loading skin…</div>
+      <p class="mc-hint">drag to rotate</p>
+    </div>
+  </section>
+
 </div>
 
 <!-- footer -->
@@ -981,25 +1041,28 @@ footer a:hover { color: var(--lavender); }
   <span style="color:var(--overlay0)">catppuccin mocha</span>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/128/three.min.js"></script>
 <script>
   // ─────────────────────────────────────────────────────────────────
   // CONFIG
   // ─────────────────────────────────────────────────────────────────
   const PINNED_NAMES = [
-    'SchoolMod', 'Kismet-OS', 'AMMOS', 'TAUMSS', 'Seqta-MCP-Server', 'Claude-Games'
+    'SchoolMod', 'AIOS', 'INDEX', 'scratchpy-studio', 'WebRunner', 'Seqta-MCP-Server'
   ];
 
+  const MC_SKIN_URL = 'https://raw.githubusercontent.com/ZDStudios/ZDStudios/refs/heads/main/ZDStudios37.png';
+
   const FALLBACK_REPOS = [
-    { name:'SchoolMod',        html_url:'https://github.com/ZDStudios/SchoolMod',        description:'Open-source browser extension that enhances popular school platforms with new features, quality-of-life improvements, and powerful integrations — all in one place.', language:'HTML',       stargazers_count:1, forks_count:0, updated_at:'2025-01-01' },
-    { name:'Kismet-OS',        html_url:'https://github.com/ZDStudios/Kismet-OS',        description:'AI-native operating system with a kernel-level agent that evolves with your habits to autonomously manage your hardware, files, and tasks.',                         language:'Python',     stargazers_count:2, forks_count:0, updated_at:'2025-01-01' },
-    { name:'AMMOS',            html_url:'https://github.com/ZDStudios/AMMOS',            description:'Automatic Minecraft Modding Operating Server.',                                                                                                                      language:'JavaScript', stargazers_count:1, forks_count:0, updated_at:'2025-01-01' },
-    { name:'TAUMSS',           html_url:'https://github.com/ZDStudios/TAUMSS',           description:'The Auto Update Minecraft Server Script.',                                                                                                                           language:'Python',     stargazers_count:0, forks_count:0, updated_at:'2025-01-01' },
-    { name:'Seqta-MCP-Server', html_url:'https://github.com/ZDStudios/Seqta-MCP-Server', description:'MCP server for SEQTA — connects AI assistants to the SEQTA learning management platform.',                                                                         language:'JavaScript', stargazers_count:0, forks_count:0, updated_at:'2025-01-01' },
-    { name:'Claude-Games',     html_url:'https://github.com/ZDStudios/Claude-Games',     description:'A collection of games built with and for Claude.',                                                                                                                   language:'HTML',       stargazers_count:0, forks_count:0, updated_at:'2025-01-01' },
+    { name:'SchoolMod',         html_url:'https://github.com/ZDStudios/SchoolMod',         description:'SchoolMod is an open-source browser extension / script that enhances the most popular school platforms with new features, quality-of-life improvements, and powerful integrations — all in one place.', language:'TypeScript', stargazers_count:2, forks_count:0, updated_at:'2026-01-01' },
+    { name:'AIOS',               html_url:'https://github.com/ZDStudios/AIOS',               description:'Nine open-source AI projects. One operating system. One Control Room. opencode + hermes + openclaw + CrewAI + claude-code + LifeOS + Fabric + Ponytail + Ruflo — auto-configured, self-healing, Docker.', language:'TypeScript', stargazers_count:3, forks_count:0, updated_at:'2026-01-01' },
+    { name:'INDEX',               html_url:'https://github.com/ZDStudios/INDEX',               description:'Immersive Navigation Dynamic Embedding X-Ray',                                                                                                                                                          language:'Python',     stargazers_count:1, forks_count:0, updated_at:'2026-01-01' },
+    { name:'scratchpy-studio',    html_url:'https://github.com/ZDStudios/scratchpy-studio',    description:'A single-file Scratch-style visual editor that writes, saves and runs real Python. Drag blocks, get code. Turns any PyPI package into blocks, imports existing .py files, and speaks MCP so an AI can use it.', language:'Python', stargazers_count:1, forks_count:0, updated_at:'2026-01-01' },
+    { name:'WebRunner',           html_url:'https://github.com/ZDStudios/WebRunner',           description:'Self-hosted job scheduler with a web dashboard. Build workflows visually from blocks — run commands, call APIs, restart services on a schedule. Linux, Windows and Docker.',                          language:'Python',     stargazers_count:1, forks_count:0, updated_at:'2026-01-01' },
+    { name:'Seqta-MCP-Server',    html_url:'https://github.com/ZDStudios/Seqta-MCP-Server',    description:'A Simple MCP Server for Seqta',                                                                                                                                                                          language:'Python',     stargazers_count:0, forks_count:0, updated_at:'2026-01-01' },
   ];
 
   // Known-correct values from your profile — shown instantly on load
-  const KNOWN = { repos:160, stars:57, followers:7, following:13, gists:0 };
+  const KNOWN = { repos:184, stars:57, followers:7, following:13, gists:0 };
 
   const LANG_COLORS = {
     Python:'#3572A5', JavaScript:'#f1e05a', TypeScript:'#2b7489',
@@ -1010,14 +1073,39 @@ footer a:hover { color: var(--lavender); }
   const ARROW = `<svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>`;
 
   // ── AVATAR ───────────────────────────────────────────────────────
-  // Uses img.src (not fetch) so cross-origin images load fine everywhere
+  // Loads the GitHub avatar onto a canvas and strips near-white pixels
+  // to transparent, so any white background/side padding disappears —
+  // the result behaves like a PNG with a transparent background.
   function loadAvatar(url) {
     const img = document.getElementById('avatar-img');
     const ph  = document.getElementById('av-placeholder');
     if (!img) return;
     const probe = new Image();
+    probe.crossOrigin = 'anonymous'; // avatars.githubusercontent.com sends CORS headers
     probe.onload = () => {
-      img.src = probe.src;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width  = probe.naturalWidth;
+        canvas.height = probe.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(probe, 0, 0);
+
+        const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data  = frame.data;
+        const WHITE_START = 200; // channel value where fading begins
+        for (let i = 0; i < data.length; i += 4) {
+          const minC = Math.min(data[i], data[i + 1], data[i + 2]);
+          if (minC > WHITE_START) {
+            const fade = Math.min(255, (minC - WHITE_START) * 6);
+            data[i + 3] = Math.max(0, data[i + 3] - fade);
+          }
+        }
+        ctx.putImageData(frame, 0, 0);
+        img.src = canvas.toDataURL('image/png');
+      } catch (e) {
+        // canvas got tainted (CORS hiccup) — fall back to the plain image
+        img.src = probe.src;
+      }
       img.style.display = 'block';
       if (ph) ph.style.display = 'none';
     };
@@ -1144,6 +1232,178 @@ footer a:hover { color: var(--lavender); }
   // Fetch live data — don't await so page doesn't wait on network
   syncGitHub();
   setInterval(syncGitHub, 60_000);
+
+  // ── MC CHARACTER VIEWER ─────────────────────────────────────────
+  // Builds a boxy Minecraft-style player model out of six textured
+  // cubes (head, body, 2 arms, 2 legs), UV-mapped from the skin PNG,
+  // then swings the arms/legs on a sine wave for a walk cycle.
+  function initMCViewer() {
+    const container = document.getElementById('mc-viewer');
+    if (!container || typeof THREE === 'undefined') return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 200);
+    camera.position.set(0, 20, 62);
+    camera.lookAt(0, 16, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    const key = new THREE.DirectionalLight(0xffffff, 0.55);
+    key.position.set(1, 1.2, 1);
+    scene.add(key);
+
+    // rig = what the mouse drag rotates; character sits inside it
+    const rig = new THREE.Group();
+    scene.add(rig);
+    const character = new THREE.Group();
+    character.position.y = -16; // recentre so mid-torso sits at the origin
+    rig.add(character);
+
+    let rightArmPivot, leftArmPivot, rightLegPivot, leftLegPivot;
+
+    // Converts a pixel rect (top-left x,y + w,h) in the skin image into
+    // the 4 UV coords three.js expects for one BoxGeometry face.
+    function faceUVs(x1, y1, x2, y2, tw, th) {
+      const u1 = x1 / tw, u2 = x2 / tw;
+      const v1 = 1 - y1 / th, v2 = 1 - y2 / th;
+      return [[u1, v1], [u2, v1], [u2, v2], [u1, v2]];
+    }
+
+    // Applies the classic Minecraft box-unwrap layout to a BoxGeometry,
+    // given the unwrap's top-left origin (u,v) and the box size (w,h,d).
+    function applyBoxUV(geometry, u, v, w, h, d, tw, th) {
+      const top    = faceUVs(u + d,         v,         u + d + w,         v + d,     tw, th);
+      const bottom = faceUVs(u + d + w,     v,         u + d + w * 2,     v + d,     tw, th);
+      const px     = faceUVs(u + d + w,     v + d,     u + d * 2 + w,     v + d + h, tw, th);
+      const nx     = faceUVs(u,             v + d,     u + d,             v + d + h, tw, th);
+      const front  = faceUVs(u + d,         v + d,     u + d + w,         v + d + h, tw, th);
+      const back   = faceUVs(u + w + d * 2, v + d,     u + w * 2 + d * 2, v + d + h, tw, th);
+      const order = [px, nx, top, bottom, front, back];
+      const uvAttr = geometry.attributes.uv;
+      let idx = 0;
+      order.forEach(face => {
+        face.forEach(([uu, vv]) => { uvAttr.setXY(idx, uu, vv); idx++; });
+      });
+      uvAttr.needsUpdate = true;
+    }
+
+    function loadingDone() {
+      const el = container.querySelector('.mc-loading');
+      if (el) el.remove();
+    }
+    function loadingFailed() {
+      const el = container.querySelector('.mc-loading');
+      if (el) el.textContent = 'skin failed to load';
+    }
+
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin('anonymous');
+    loader.load(MC_SKIN_URL, (texture) => {
+      texture.magFilter = THREE.NearestFilter;
+      texture.minFilter = THREE.NearestFilter;
+      const tw = texture.image.width;
+      const th = texture.image.height;
+      const legacy = th <= 32; // 64x32 skins share one arm/leg texture, mirrored
+
+      const material = new THREE.MeshLambertMaterial({
+        map: texture, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide,
+      });
+
+      function box(w, h, d, u, v) {
+        const geo = new THREE.BoxGeometry(w, h, d);
+        applyBoxUV(geo, u, v, w, h, d, tw, th);
+        return new THREE.Mesh(geo, material);
+      }
+
+      // limb = pivot group (at the joint) + mesh hung below it, so
+      // rotating the pivot swings the whole limb from the joint.
+      function limb(w, h, d, u, v, mirror) {
+        const mesh = box(w, h, d, u, v);
+        mesh.position.y = -h / 2;
+        if (mirror) mesh.scale.x = -1;
+        const pivot = new THREE.Group();
+        pivot.add(mesh);
+        return pivot;
+      }
+
+      const body = box(8, 12, 4, 16, 16);
+      body.position.y = 18;
+      character.add(body);
+
+      const head = box(8, 8, 8, 0, 0);
+      head.position.y = 28;
+      character.add(head);
+
+      rightArmPivot = limb(4, 12, 4, 40, 16, false);
+      rightArmPivot.position.set(-6, 24, 0);
+      character.add(rightArmPivot);
+
+      leftArmPivot = legacy
+        ? limb(4, 12, 4, 40, 16, true)
+        : limb(4, 12, 4, 32, 48, false);
+      leftArmPivot.position.set(6, 24, 0);
+      character.add(leftArmPivot);
+
+      rightLegPivot = limb(4, 12, 4, 0, 16, false);
+      rightLegPivot.position.set(-2, 12, 0);
+      character.add(rightLegPivot);
+
+      leftLegPivot = legacy
+        ? limb(4, 12, 4, 0, 16, true)
+        : limb(4, 12, 4, 16, 48, false);
+      leftLegPivot.position.set(2, 12, 0);
+      character.add(leftLegPivot);
+
+      loadingDone();
+    }, undefined, loadingFailed);
+
+    // ── drag to rotate ──
+    let dragging = false, lastX = 0;
+    const dom = renderer.domElement;
+    dom.addEventListener('pointerdown', (e) => {
+      dragging = true; lastX = e.clientX;
+      dom.setPointerCapture(e.pointerId);
+    });
+    dom.addEventListener('pointerup', () => { dragging = false; });
+    dom.addEventListener('pointercancel', () => { dragging = false; });
+    dom.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      rig.rotation.y += (e.clientX - lastX) * 0.012;
+      lastX = e.clientX;
+    });
+
+    // ── resize handling ──
+    function onResize() {
+      const w = container.clientWidth, h = container.clientHeight;
+      if (!w || !h) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+    if (window.ResizeObserver) new ResizeObserver(onResize).observe(container);
+
+    // ── walk cycle + render loop ──
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+      const swing = Math.sin(t * 4.2) * 0.55;
+      if (rightArmPivot) rightArmPivot.rotation.x = swing;
+      if (leftArmPivot)  leftArmPivot.rotation.x  = -swing;
+      if (rightLegPivot) rightLegPivot.rotation.x = -swing;
+      if (leftLegPivot)  leftLegPivot.rotation.x  = swing;
+      if (!dragging) rig.rotation.y += 0.0035;
+      renderer.render(scene, camera);
+    }
+    animate();
+  }
+
+  initMCViewer();
 </script>
 </body>
 </html>
