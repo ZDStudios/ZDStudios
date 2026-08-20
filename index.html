@@ -1070,31 +1070,53 @@ footer a:hover { color: var(--lavender); }
   const ARROW = `<svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>`;
 
   // ── AVATAR ───────────────────────────────────────────────────────
-  // Loads an image onto a canvas and strips near-white pixels to
-  // transparent, so any white background/side padding disappears —
-  // the result behaves like a PNG with a transparent background.
-  // Used for both the hero avatar AND the browser-tab favicon.
+  // Loads an image onto a canvas and flood-fills transparency in from
+  // every edge pixel, so only the background (whatever touches the
+  // border) gets cleared — corners included, however light or slightly
+  // off-white they are — while any light colors that are part of the
+  // actual artwork (not connected to an edge) are left alone. Used for
+  // both the hero avatar AND the browser-tab favicon.
   function stripWhiteBackground(url, onDone) {
     const probe = new Image();
     probe.crossOrigin = 'anonymous'; // avatars.githubusercontent.com sends CORS headers
     probe.onload = () => {
       try {
         const canvas = document.createElement('canvas');
-        canvas.width  = probe.naturalWidth;
-        canvas.height = probe.naturalHeight;
+        const w = probe.naturalWidth, h = probe.naturalHeight;
+        canvas.width = w;
+        canvas.height = h;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(probe, 0, 0);
 
-        const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data  = frame.data;
-        const WHITE_START = 200; // channel value where fading begins
-        for (let i = 0; i < data.length; i += 4) {
-          const minC = Math.min(data[i], data[i + 1], data[i + 2]);
-          if (minC > WHITE_START) {
-            const fade = Math.min(255, (minC - WHITE_START) * 6);
-            data[i + 3] = Math.max(0, data[i + 3] - fade);
-          }
+        const frame = ctx.getImageData(0, 0, w, h);
+        const data = frame.data;
+        const visited = new Uint8Array(w * h);
+        const stack = [];
+
+        // "background-ish" = light AND low-saturation, so it catches
+        // white/off-white/light-gray but leaves actual colored or dark
+        // artwork (eyes, outlines, etc.) untouched.
+        function isBackgroundish(p) {
+          const r = data[p], g = data[p + 1], b = data[p + 2];
+          const minC = Math.min(r, g, b), maxC = Math.max(r, g, b);
+          return minC > 165 && (maxC - minC) < 45;
         }
+
+        for (let x = 0; x < w; x++) { stack.push(x, 0, x, h - 1); }
+        for (let y = 0; y < h; y++) { stack.push(0, y, w - 1, y); }
+
+        while (stack.length) {
+          const y = stack.pop(), x = stack.pop();
+          if (x < 0 || y < 0 || x >= w || y >= h) continue;
+          const idx = y * w + x;
+          if (visited[idx]) continue;
+          visited[idx] = 1;
+          const p = idx * 4;
+          if (!isBackgroundish(p)) continue; // hit the artwork — stop spreading here
+          data[p + 3] = 0;
+          stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
+        }
+
         ctx.putImageData(frame, 0, 0);
         onDone(canvas.toDataURL('image/png'));
       } catch (e) {
