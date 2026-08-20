@@ -1096,17 +1096,16 @@ footer a:hover { color: var(--lavender); }
         // "background-ish" = light AND low-saturation, so it catches
         // white/off-white/light-gray but leaves actual colored or dark
         // artwork (eyes, outlines, etc.) untouched.
-        // "background-ish" = low-saturation AND near one extreme (light or
-        // dark), so it catches white/off-white AND solid black/near-black
-        // fills, while leaving actual colored artwork (blue, orange, purple,
-        // etc.) alone regardless of how light or dark those colors are.
+        // "background-ish" = low color saturation — catches white, black,
+        // and every gray in between (including anti-aliased edge pixels),
+        // so the fill can tunnel from a white area straight through to a
+        // black area without an intermediate gray ring blocking it. Actual
+        // artwork colors (blue, orange, purple, etc.) are saturated enough
+        // to stop the fill wherever it meets them.
         function isBackgroundish(p) {
           const r = data[p], g = data[p + 1], b = data[p + 2];
-          const minC = Math.min(r, g, b), maxC = Math.max(r, g, b);
-          const sat = maxC - minC;
-          const isLight = minC > 165 && sat < 45;
-          const isDark  = maxC < 60 && sat < 30;
-          return isLight || isDark;
+          const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
+          return (maxC - minC) < 40;
         }
 
         for (let x = 0; x < w; x++) { stack.push(x, 0, x, h - 1); }
