@@ -93,14 +93,12 @@ body::after {
   to   { transform: scale(1.1) translate(20px, 15px); }
 }
 
-/* dots grid */
-.bg-layer::after {
-  content: '';
+/* dots grid — drawn on #dots-canvas via JS so it can react to the mouse */
+#dots-canvas {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, var(--surface1) 1px, transparent 1px);
-  background-size: 32px 32px;
-  opacity: .18;
+  width: 100%;
+  height: 100%;
 }
 
 /* ─────────────────────────────────────────────
@@ -805,6 +803,7 @@ footer a:hover { color: var(--lavender); }
   <div class="bg-orb orb-c"></div>
   <div class="bg-orb orb-d"></div>
   <div class="bg-orb orb-e"></div>
+  <canvas id="dots-canvas"></canvas>
 </div>
 
 <!-- nav -->
@@ -1013,8 +1012,9 @@ footer a:hover { color: var(--lavender); }
       <h2 class="section-title">MC <span>Character</span></h2>
     </div>
     <div class="mc-viewer-frame" id="mc-viewer">
+      <canvas id="mc-canvas"></canvas>
       <div class="mc-loading">loading skin…</div>
-      <p class="mc-hint">drag to rotate</p>
+      <p class="mc-hint">drag to rotate · scroll to zoom</p>
     </div>
   </section>
 
@@ -1041,7 +1041,6 @@ footer a:hover { color: var(--lavender); }
   <span style="color:var(--overlay0)">catppuccin mocha</span>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/128/three.min.js"></script>
 <script>
   // ─────────────────────────────────────────────────────────────────
   // CONFIG
@@ -1049,8 +1048,6 @@ footer a:hover { color: var(--lavender); }
   const PINNED_NAMES = [
     'SchoolMod', 'AIOS', 'INDEX', 'scratchpy-studio', 'WebRunner', 'Seqta-MCP-Server'
   ];
-
-  const MC_SKIN_URL = 'https://raw.githubusercontent.com/ZDStudios/ZDStudios/refs/heads/main/ZDStudios37.png';
 
   const FALLBACK_REPOS = [
     { name:'SchoolMod',         html_url:'https://github.com/ZDStudios/SchoolMod',         description:'SchoolMod is an open-source browser extension / script that enhances the most popular school platforms with new features, quality-of-life improvements, and powerful integrations — all in one place.', language:'TypeScript', stargazers_count:2, forks_count:0, updated_at:'2026-01-01' },
@@ -1073,13 +1070,11 @@ footer a:hover { color: var(--lavender); }
   const ARROW = `<svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>`;
 
   // ── AVATAR ───────────────────────────────────────────────────────
-  // Loads the GitHub avatar onto a canvas and strips near-white pixels
-  // to transparent, so any white background/side padding disappears —
+  // Loads an image onto a canvas and strips near-white pixels to
+  // transparent, so any white background/side padding disappears —
   // the result behaves like a PNG with a transparent background.
-  function loadAvatar(url) {
-    const img = document.getElementById('avatar-img');
-    const ph  = document.getElementById('av-placeholder');
-    if (!img) return;
+  // Used for both the hero avatar AND the browser-tab favicon.
+  function stripWhiteBackground(url, onDone) {
     const probe = new Image();
     probe.crossOrigin = 'anonymous'; // avatars.githubusercontent.com sends CORS headers
     probe.onload = () => {
@@ -1101,19 +1096,36 @@ footer a:hover { color: var(--lavender); }
           }
         }
         ctx.putImageData(frame, 0, 0);
-        img.src = canvas.toDataURL('image/png');
+        onDone(canvas.toDataURL('image/png'));
       } catch (e) {
         // canvas got tainted (CORS hiccup) — fall back to the plain image
-        img.src = probe.src;
+        onDone(url);
       }
-      img.style.display = 'block';
-      if (ph) ph.style.display = 'none';
     };
+    probe.onerror = () => onDone(url);
     probe.src = url;
   }
 
-  // Show avatar immediately from known URL — no waiting for API
+  function loadAvatar(url) {
+    const img = document.getElementById('avatar-img');
+    const ph  = document.getElementById('av-placeholder');
+    if (!img) return;
+    stripWhiteBackground(url, (dataUrl) => {
+      img.src = dataUrl;
+      img.style.display = 'block';
+      if (ph) ph.style.display = 'none';
+    });
+  }
+
+  function loadFavicon(url) {
+    const fav = document.getElementById('favicon');
+    if (!fav) return;
+    stripWhiteBackground(url, (dataUrl) => { fav.href = dataUrl; });
+  }
+
+  // Show avatar + favicon immediately from known URLs — no waiting for API
   loadAvatar('https://avatars.githubusercontent.com/u/121779558?v=4&s=200');
+  loadFavicon('https://avatars.githubusercontent.com/u/121779558?v=4&s=32');
 
   // ── STATS — shown instantly from KNOWN, then silently updated ────
   // Write directly without animation first (no flash/opacity tricks)
@@ -1193,8 +1205,7 @@ footer a:hover { color: var(--lavender); }
       // Update avatar + favicon from freshest API URL
       if (user.avatar_url) {
         loadAvatar(user.avatar_url + '&s=200');
-        const fav = document.getElementById('favicon');
-        if (fav) fav.href = user.avatar_url + '&s=32';
+        loadFavicon(user.avatar_url + '&s=32');
       }
 
       // Smoothly animate only stats that actually changed
@@ -1232,175 +1243,149 @@ footer a:hover { color: var(--lavender); }
   // Fetch live data — don't await so page doesn't wait on network
   syncGitHub();
   setInterval(syncGitHub, 60_000);
+</script>
 
-  // ── MC CHARACTER VIEWER ─────────────────────────────────────────
-  // Builds a boxy Minecraft-style player model out of six textured
-  // cubes (head, body, 2 arms, 2 legs), UV-mapped from the skin PNG,
-  // then swings the arms/legs on a sine wave for a walk cycle.
+<!-- background dot grid — brightens and grows near the mouse -->
+<script>
+(function initDots() {
+  const canvas = document.getElementById('dots-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const SPACING = 32;   // matches the old CSS background-size
+  const OFFSET  = 16;   // centres dots the same way the old radial-gradient did
+  const REACT_R = 140;  // how far out the mouse influence reaches, in px
+  const BASE_R  = 1;    // resting dot radius
+  const HOT_R   = 3.2;  // dot radius right under the cursor
+  const BASE_A  = 0.18; // resting opacity (matches the old CSS layer opacity)
+  const HOT_A   = 0.9;  // opacity right under the cursor
+
+  function cssVarRGB(name) {
+    const hex = getComputedStyle(document.documentElement).getPropertyValue(name).trim().replace('#', '');
+    const n = parseInt(hex, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  const baseRGB = cssVarRGB('--surface1');
+  const hotRGB  = cssVarRGB('--lavender');
+
+  let mouse = null; // {x,y} in CSS px, or null when the mouse isn't hovering
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let W = 0, H = 0;
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  window.addEventListener('mousemove', (e) => { mouse = { x: e.clientX, y: e.clientY }; });
+  window.addEventListener('mouseleave', () => { mouse = null; });
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const cols = Math.ceil(W / SPACING) + 1;
+    const rows = Math.ceil(H / SPACING) + 1;
+
+    for (let j = 0; j < rows; j++) {
+      const y = OFFSET + j * SPACING;
+      // skip rows nowhere near the cursor's Y — cheap early-out
+      const rowNearMouse = mouse && Math.abs(y - mouse.y) < REACT_R;
+
+      for (let i = 0; i < cols; i++) {
+        const x = OFFSET + i * SPACING;
+        let r = BASE_R, a = BASE_A, color = baseRGB;
+
+        if (rowNearMouse) {
+          const dx = x - mouse.x, dy = y - mouse.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < REACT_R) {
+            const t = 1 - dist / REACT_R;
+            const eased = t * t;
+            r = BASE_R + eased * (HOT_R - BASE_R);
+            a = BASE_A + eased * (HOT_A - BASE_A);
+            color = [
+              Math.round(baseRGB[0] + (hotRGB[0] - baseRGB[0]) * eased),
+              Math.round(baseRGB[1] + (hotRGB[1] - baseRGB[1]) * eased),
+              Math.round(baseRGB[2] + (hotRGB[2] - baseRGB[2]) * eased),
+            ];
+          }
+        }
+
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${a})`;
+        ctx.fill();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+</script>
+
+<!-- safety net: if the module below never resolves, stop showing "loading" -->
+<script>
+  setTimeout(function () {
+    var el = document.querySelector('#mc-viewer .mc-loading');
+    if (el && /loading/i.test(el.textContent)) {
+      el.textContent = 'could not load the 3D viewer';
+    }
+  }, 8000);
+</script>
+
+<!-- MC character viewer — powered by skinview3d (bs-community/skinview3d),
+     a public, actively-maintained Minecraft skin renderer, instead of a
+     hand-rolled one. Handles UV mapping, slim/classic detection, and
+     drag-to-rotate / scroll-to-zoom controls out of the box. -->
+<script type="module">
+  import * as skinview3d from 'https://cdn.jsdelivr.net/npm/skinview3d@3.4.1/+esm';
+
+  const MC_SKIN_URL = 'https://raw.githubusercontent.com/ZDStudios/ZDStudios/refs/heads/main/ZDStudios37.png';
+
   function initMCViewer() {
     const container = document.getElementById('mc-viewer');
-    if (!container || typeof THREE === 'undefined') return;
+    const canvas = document.getElementById('mc-canvas');
+    if (!container || !canvas) return;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 200);
-    camera.position.set(0, 20, 62);
-    camera.lookAt(0, 16, 0);
+    const viewer = new skinview3d.SkinViewer({
+      canvas: canvas,
+      width: container.clientWidth,
+      height: container.clientHeight,
+    });
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(renderer.domElement);
+    viewer.zoom = 0.85;
+    viewer.autoRotate = true;
+    viewer.animation = new skinview3d.WalkingAnimation();
+    viewer.animation.speed = 0.9;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
-    const key = new THREE.DirectionalLight(0xffffff, 0.55);
-    key.position.set(1, 1.2, 1);
-    scene.add(key);
-
-    // rig = what the mouse drag rotates; character sits inside it
-    const rig = new THREE.Group();
-    scene.add(rig);
-    const character = new THREE.Group();
-    character.position.y = -16; // recentre so mid-torso sits at the origin
-    rig.add(character);
-
-    let rightArmPivot, leftArmPivot, rightLegPivot, leftLegPivot;
-
-    // Converts a pixel rect (top-left x,y + w,h) in the skin image into
-    // the 4 UV coords three.js expects for one BoxGeometry face.
-    function faceUVs(x1, y1, x2, y2, tw, th) {
-      const u1 = x1 / tw, u2 = x2 / tw;
-      const v1 = 1 - y1 / th, v2 = 1 - y2 / th;
-      return [[u1, v1], [u2, v1], [u2, v2], [u1, v2]];
-    }
-
-    // Applies the classic Minecraft box-unwrap layout to a BoxGeometry,
-    // given the unwrap's top-left origin (u,v) and the box size (w,h,d).
-    function applyBoxUV(geometry, u, v, w, h, d, tw, th) {
-      const top    = faceUVs(u + d,         v,         u + d + w,         v + d,     tw, th);
-      const bottom = faceUVs(u + d + w,     v,         u + d + w * 2,     v + d,     tw, th);
-      const px     = faceUVs(u + d + w,     v + d,     u + d * 2 + w,     v + d + h, tw, th);
-      const nx     = faceUVs(u,             v + d,     u + d,             v + d + h, tw, th);
-      const front  = faceUVs(u + d,         v + d,     u + d + w,         v + d + h, tw, th);
-      const back   = faceUVs(u + w + d * 2, v + d,     u + w * 2 + d * 2, v + d + h, tw, th);
-      const order = [px, nx, top, bottom, front, back];
-      const uvAttr = geometry.attributes.uv;
-      let idx = 0;
-      order.forEach(face => {
-        face.forEach(([uu, vv]) => { uvAttr.setXY(idx, uu, vv); idx++; });
-      });
-      uvAttr.needsUpdate = true;
-    }
-
-    function loadingDone() {
+    function hideLoading() {
       const el = container.querySelector('.mc-loading');
       if (el) el.remove();
     }
-    function loadingFailed() {
+    function showError() {
       const el = container.querySelector('.mc-loading');
       if (el) el.textContent = 'skin failed to load';
     }
 
-    const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('anonymous');
-    loader.load(MC_SKIN_URL, (texture) => {
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      const tw = texture.image.width;
-      const th = texture.image.height;
-      const legacy = th <= 32; // 64x32 skins share one arm/leg texture, mirrored
+    Promise.resolve(viewer.loadSkin(MC_SKIN_URL)).then(hideLoading).catch(showError);
 
-      const material = new THREE.MeshLambertMaterial({
-        map: texture, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide,
-      });
+    // stop the auto-spin once the person starts dragging (skinview3d
+    // ships its own orbit-style controls for the actual rotate/zoom)
+    canvas.addEventListener('pointerdown', () => { viewer.autoRotate = false; });
 
-      function box(w, h, d, u, v) {
-        const geo = new THREE.BoxGeometry(w, h, d);
-        applyBoxUV(geo, u, v, w, h, d, tw, th);
-        return new THREE.Mesh(geo, material);
-      }
-
-      // limb = pivot group (at the joint) + mesh hung below it, so
-      // rotating the pivot swings the whole limb from the joint.
-      function limb(w, h, d, u, v, mirror) {
-        const mesh = box(w, h, d, u, v);
-        mesh.position.y = -h / 2;
-        if (mirror) mesh.scale.x = -1;
-        const pivot = new THREE.Group();
-        pivot.add(mesh);
-        return pivot;
-      }
-
-      const body = box(8, 12, 4, 16, 16);
-      body.position.y = 18;
-      character.add(body);
-
-      const head = box(8, 8, 8, 0, 0);
-      head.position.y = 28;
-      character.add(head);
-
-      rightArmPivot = limb(4, 12, 4, 40, 16, false);
-      rightArmPivot.position.set(-6, 24, 0);
-      character.add(rightArmPivot);
-
-      leftArmPivot = legacy
-        ? limb(4, 12, 4, 40, 16, true)
-        : limb(4, 12, 4, 32, 48, false);
-      leftArmPivot.position.set(6, 24, 0);
-      character.add(leftArmPivot);
-
-      rightLegPivot = limb(4, 12, 4, 0, 16, false);
-      rightLegPivot.position.set(-2, 12, 0);
-      character.add(rightLegPivot);
-
-      leftLegPivot = legacy
-        ? limb(4, 12, 4, 0, 16, true)
-        : limb(4, 12, 4, 16, 48, false);
-      leftLegPivot.position.set(2, 12, 0);
-      character.add(leftLegPivot);
-
-      loadingDone();
-    }, undefined, loadingFailed);
-
-    // ── drag to rotate ──
-    let dragging = false, lastX = 0;
-    const dom = renderer.domElement;
-    dom.addEventListener('pointerdown', (e) => {
-      dragging = true; lastX = e.clientX;
-      dom.setPointerCapture(e.pointerId);
-    });
-    dom.addEventListener('pointerup', () => { dragging = false; });
-    dom.addEventListener('pointercancel', () => { dragging = false; });
-    dom.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      rig.rotation.y += (e.clientX - lastX) * 0.012;
-      lastX = e.clientX;
-    });
-
-    // ── resize handling ──
     function onResize() {
       const w = container.clientWidth, h = container.clientHeight;
-      if (!w || !h) return;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
+      if (w && h) { viewer.width = w; viewer.height = h; }
     }
     window.addEventListener('resize', onResize);
     if (window.ResizeObserver) new ResizeObserver(onResize).observe(container);
-
-    // ── walk cycle + render loop ──
-    const clock = new THREE.Clock();
-    function animate() {
-      requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-      const swing = Math.sin(t * 4.2) * 0.55;
-      if (rightArmPivot) rightArmPivot.rotation.x = swing;
-      if (leftArmPivot)  leftArmPivot.rotation.x  = -swing;
-      if (rightLegPivot) rightLegPivot.rotation.x = -swing;
-      if (leftLegPivot)  leftLegPivot.rotation.x  = swing;
-      if (!dragging) rig.rotation.y += 0.0035;
-      renderer.render(scene, camera);
-    }
-    animate();
   }
 
   initMCViewer();
