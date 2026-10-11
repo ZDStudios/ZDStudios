@@ -8,10 +8,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet"/>
+<noscript><style>.fade{opacity:1!important;translate:none!important}</style></noscript>
 <style>
 /* ─────────────────────────────────────────────
    Catppuccin Mocha — full palette
 ───────────────────────────────────────────── */
+
+/* registered so the accent colour can glide smoothly when you recolour the site */
+@property --mauve { syntax: '<color>'; inherits: true; initial-value: #cba6f7; }
+
 :root {
   --crust:    #11111b;
   --mantle:   #181825;
@@ -39,10 +44,17 @@
   --pink:     #f5c2e7;
   --flamingo: #f2cdcd;
   --rosewater:#f5e0dc;
+
+  /* motion curves */
+  --ease:        cubic-bezier(.22, 1, .36, 1);
+  --ease-out:    cubic-bezier(.16, 1, .3, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+
+  transition: --mauve .7s var(--ease);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
 
 body {
   background: var(--crust);
@@ -54,6 +66,8 @@ body {
   min-height: 100vh;
 }
 
+::selection { background: color-mix(in srgb, var(--mauve) 40%, transparent); color: var(--text); }
+
 /* ── noise grain overlay ── */
 body::after {
   content: '';
@@ -63,6 +77,18 @@ body::after {
   opacity: 0.03;
   pointer-events: none;
   z-index: 9999;
+}
+
+/* scroll progress bar */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  z-index: 300;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--mauve), var(--blue), var(--teal));
+  will-change: transform;
 }
 
 /* ─────────────────────────────────────────────
@@ -81,6 +107,7 @@ body::after {
   border-radius: 50%;
   filter: blur(140px);
   mix-blend-mode: screen;
+  will-change: transform, translate;
 }
 .orb-a { width: 700px; height: 700px; background: var(--mauve);    top: -200px;  right: -180px;  opacity: .12; animation: breathe 14s ease-in-out infinite alternate; }
 .orb-b { width: 500px; height: 500px; background: var(--blue);     bottom: -80px; left: -120px;   opacity: .10; animation: breathe 18s ease-in-out infinite alternate-reverse; }
@@ -93,6 +120,22 @@ body::after {
   to   { transform: scale(1.1) translate(20px, 15px); }
 }
 
+/* soft glow that follows the cursor */
+.cursor-glow {
+  position: absolute;
+  left: 0; top: 0;
+  width: 520px; height: 520px;
+  margin: -260px 0 0 -260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--mauve) 17%, transparent), transparent 65%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity .6s var(--ease);
+  will-change: translate;
+}
+.cursor-glow.on { opacity: 1; }
+@media (hover: none), (pointer: coarse) { .cursor-glow { display: none; } }
+
 /* dots grid — drawn on #dots-canvas via JS so it can react to the mouse */
 #dots-canvas {
   position: absolute;
@@ -100,6 +143,37 @@ body::after {
   width: 100%;
   height: 100%;
 }
+
+/* confetti layer */
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* toast */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  translate: -50% 24px;
+  opacity: 0;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--mantle);
+  border: 1px solid var(--surface1);
+  color: var(--text);
+  font-size: .74rem;
+  letter-spacing: .03em;
+  z-index: 10000;
+  pointer-events: none;
+  transition: opacity .35s var(--ease), translate .5s var(--ease-spring);
+  box-shadow: 0 12px 40px rgba(0,0,0,.45);
+}
+.toast.show { opacity: 1; translate: -50% 0; }
 
 /* ─────────────────────────────────────────────
    NAV
@@ -124,7 +198,10 @@ nav {
   font-size: 1rem;
   letter-spacing: -.04em;
   color: var(--mauve);
+  cursor: pointer;
+  transition: transform .4s var(--ease-spring);
 }
+.nav-wordmark:hover { transform: scale(1.08) rotate(-2deg); }
 
 .nav-links {
   display: flex;
@@ -132,6 +209,7 @@ nav {
   gap: 0;
 }
 .nav-links li a {
+  position: relative;
   display: block;
   padding: 6px 14px;
   color: var(--overlay2);
@@ -140,12 +218,22 @@ nav {
   letter-spacing: .08em;
   text-transform: uppercase;
   border-radius: 6px;
-  transition: color .2s, background .2s;
+  transition: color .3s var(--ease), background .3s var(--ease);
 }
-.nav-links li a:hover {
-  color: var(--text);
-  background: var(--surface0);
+.nav-links li a::after {
+  content: '';
+  position: absolute;
+  left: 14px; right: 14px; bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--mauve);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .45s var(--ease);
 }
+.nav-links li a:hover { color: var(--text); background: var(--surface0); }
+.nav-links li a.active { color: var(--text); }
+.nav-links li a.active::after { transform: scaleX(1); }
 
 /* ─────────────────────────────────────────────
    LAYOUT
@@ -175,6 +263,7 @@ nav {
   text-transform: uppercase;
   color: var(--teal);
   margin-bottom: 18px;
+  min-height: 1.4em;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -185,6 +274,7 @@ nav {
   width: 28px;
   height: 1px;
   background: var(--teal);
+  flex-shrink: 0;
 }
 
 .hero-name {
@@ -195,6 +285,8 @@ nav {
   letter-spacing: -.05em;
   color: var(--text);
   margin-bottom: 6px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .hero-name-accent {
@@ -203,7 +295,7 @@ nav {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradient-shift 6s ease infinite alternate;
+  animation: gradient-shift 7s ease-in-out infinite alternate;
   background-size: 200%;
 }
 @keyframes gradient-shift {
@@ -253,9 +345,14 @@ nav {
   text-transform: uppercase;
   border: 1px solid currentColor;
   opacity: .8;
-  transition: opacity .2s;
+  cursor: default;
+  transition: opacity .3s var(--ease), transform .4s var(--ease-spring), background .3s var(--ease);
 }
-.tag:hover { opacity: 1; }
+.tag:hover {
+  opacity: 1;
+  transform: translateY(-3px) rotate(-1.5deg);
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
 .tag-mauve   { color: var(--mauve);   }
 .tag-blue    { color: var(--blue);    }
 .tag-teal    { color: var(--teal);    }
@@ -273,6 +370,8 @@ nav {
 }
 
 .btn {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -286,16 +385,24 @@ nav {
   text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: transform .15s, box-shadow .15s, filter .15s;
+  transition:
+    transform .35s var(--ease-out),
+    translate .35s var(--ease-out),
+    box-shadow .35s var(--ease),
+    filter .3s var(--ease),
+    background .3s var(--ease),
+    border-color .3s var(--ease),
+    color .3s var(--ease);
 }
-.btn:hover { transform: translateY(-2px); }
+.btn:hover  { transform: translateY(-2px); }
+.btn:active { transform: translateY(0) scale(.96); transition-duration: .1s; }
 
 .btn-mauve {
   background: var(--mauve);
   color: var(--crust);
-  box-shadow: 0 0 0 0 rgba(203,166,247,0);
+  box-shadow: 0 0 0 0 transparent;
 }
-.btn-mauve:hover { box-shadow: 0 6px 28px rgba(203,166,247,.35); filter: brightness(1.08); }
+.btn-mauve:hover { box-shadow: 0 6px 28px color-mix(in srgb, var(--mauve) 38%, transparent); filter: brightness(1.08); }
 
 .btn-outline {
   background: transparent;
@@ -303,6 +410,17 @@ nav {
   border: 1px solid var(--surface1);
 }
 .btn-outline:hover { border-color: var(--surface2); color: var(--text); background: var(--surface0); }
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .25;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple .65s var(--ease-out) forwards;
+}
+@keyframes ripple { to { transform: scale(1); opacity: 0; } }
 
 /* ── avatar ── */
 .avatar-col {
@@ -315,6 +433,10 @@ nav {
   position: relative;
   width: 240px;
   height: 240px;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform .45s var(--ease-out);
+  will-change: transform;
 }
 
 .avatar-halo {
@@ -350,6 +472,11 @@ nav {
   border-radius: 50%;
   object-fit: cover;
   display: block;
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
 }
 
 .avatar-placeholder {
@@ -369,9 +496,7 @@ nav {
 /* ─────────────────────────────────────────────
    SECTION HEADERS
 ───────────────────────────────────────────── */
-.section-head {
-  margin-bottom: 28px;
-}
+.section-head { margin-bottom: 28px; }
 
 .section-kicker {
   font-size: .65rem;
@@ -408,6 +533,20 @@ nav {
   opacity: .4;
 }
 
+/* shared card spotlight (follows the cursor) */
+.project::after, .stat::after, .ach::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%),
+              color-mix(in srgb, var(--accent, var(--mauve)) 16%, transparent), transparent 65%);
+  opacity: 0;
+  transition: opacity .4s var(--ease);
+  pointer-events: none;
+}
+.project:hover::after, .stat:hover::after, .ach:hover::after { opacity: 1; }
+
 /* ─────────────────────────────────────────────
    STATS GRID
 ───────────────────────────────────────────── */
@@ -422,18 +561,16 @@ nav {
 }
 
 .stat {
+  --accent: var(--stat-color);
   background: var(--mantle);
   border: 1px solid var(--surface0);
   border-radius: 10px;
   padding: 20px 22px;
   position: relative;
   overflow: hidden;
-  transition: border-color .2s, transform .2s;
+  will-change: transform;
 }
-.stat:hover {
-  border-color: var(--surface2);
-  transform: translateY(-3px);
-}
+.stat:hover { border-color: var(--surface2); transform: translateY(-3px); }
 
 /* colour-coded left bar */
 .stat::before {
@@ -443,7 +580,9 @@ nav {
   width: 3px;
   border-radius: 10px 0 0 10px;
   background: var(--stat-color);
+  transition: width .4s var(--ease);
 }
+.stat:hover::before { width: 5px; }
 
 .stat-num {
   font-family: 'Bricolage Grotesque', sans-serif;
@@ -452,6 +591,7 @@ nav {
   line-height: 1;
   color: var(--stat-color);
   margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-desc {
@@ -491,27 +631,16 @@ nav {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: border-color .2s, transform .2s, box-shadow .2s;
   position: relative;
   overflow: hidden;
-}
-
-.project::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent 60%, rgba(203,166,247,.04));
-  opacity: 0;
-  transition: opacity .3s;
-  pointer-events: none;
+  will-change: transform;
 }
 
 .project:hover {
-  border-color: var(--mauve);
+  border-color: var(--accent, var(--mauve));
   transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0,0,0,.4);
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
 }
-.project:hover::after { opacity: 1; }
 
 .project-name {
   font-family: 'Bricolage Grotesque', sans-serif;
@@ -528,12 +657,12 @@ nav {
   width: 16px;
   height: 16px;
   color: var(--overlay1);
-  transition: color .2s, transform .2s;
+  transition: color .3s var(--ease), transform .45s var(--ease-spring);
   flex-shrink: 0;
 }
 .project:hover .project-arrow {
-  color: var(--mauve);
-  transform: translate(2px, -2px);
+  color: var(--accent, var(--mauve));
+  transform: translate(3px, -3px) scale(1.15);
 }
 
 .project-desc {
@@ -578,15 +707,11 @@ nav {
   width: 8px; height: 8px;
   border-radius: 50%;
   background: var(--lang-col);
+  transition: transform .4s var(--ease-spring), box-shadow .4s var(--ease);
 }
-.lang-python  { --lang-col: #3572A5; }
-.lang-js      { --lang-col: #f1e05a; }
-.lang-html    { --lang-col: #e34c26; }
-
-.star-count {
-  margin-left: auto;
-  color: var(--yellow);
-  font-weight: 600;
+.project:hover .lang-dot::before {
+  transform: scale(1.4);
+  box-shadow: 0 0 10px var(--lang-col);
 }
 
 /* ─────────────────────────────────────────────
@@ -600,6 +725,9 @@ nav {
 @media (max-width: 600px) { .ach-grid { grid-template-columns: 1fr; } }
 
 .ach {
+  --accent: var(--yellow);
+  position: relative;
+  overflow: hidden;
   background: var(--mantle);
   border: 1px solid var(--surface0);
   border-radius: 10px;
@@ -607,12 +735,9 @@ nav {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: border-color .2s, transform .2s;
+  will-change: transform;
 }
-.ach:hover {
-  border-color: var(--yellow);
-  transform: translateY(-3px);
-}
+.ach:hover { border-color: var(--yellow); transform: translateY(-3px); }
 
 .ach-icon-wrap {
   width: 36px; height: 36px;
@@ -622,11 +747,11 @@ nav {
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
+  transition: transform .5s var(--ease-spring), background .3s var(--ease);
 }
+.ach:hover .ach-icon-wrap { transform: rotate(-10deg) scale(1.15); background: var(--surface1); }
 
-.ach-icon-wrap svg {
-  width: 18px; height: 18px;
-}
+.ach-icon-wrap svg { width: 18px; height: 18px; }
 
 .ach-name {
   font-family: 'Bricolage Grotesque', sans-serif;
@@ -657,17 +782,13 @@ nav {
   border: 1px solid var(--surface0);
   color: var(--subtext1);
   letter-spacing: .04em;
-  transition: all .18s;
-  cursor: default;
+  transition: color .3s var(--ease), background .3s var(--ease), border-color .3s var(--ease), transform .4s var(--ease-spring);
+  cursor: pointer;
+  user-select: none;
 }
-.skill:hover {
-  color: var(--text);
-  background: var(--surface0);
-  border-color: var(--surface1);
-  transform: translateY(-2px);
-}
+.skill:hover { color: var(--text); background: var(--surface0); border-color: var(--surface1); transform: translateY(-3px) rotate(-1deg); }
+.skill:active { transform: scale(.92); transition-duration: .1s; }
 
-/* individual colour tints on hover via data-col */
 .skill[data-c="mauve"]:hover  { border-color: var(--mauve);   color: var(--mauve);  background: rgba(203,166,247,.08); }
 .skill[data-c="blue"]:hover   { border-color: var(--blue);    color: var(--blue);   background: rgba(137,180,250,.08); }
 .skill[data-c="teal"]:hover   { border-color: var(--teal);    color: var(--teal);   background: rgba(148,226,213,.08); }
@@ -687,7 +808,9 @@ nav {
   border: 1px solid var(--surface0);
   border-radius: 10px;
   overflow: hidden;
+  transition: border-color .4s var(--ease);
 }
+.mc-viewer-frame:hover { border-color: var(--surface2); }
 .mc-viewer-frame canvas {
   display: block;
   width: 100%;
@@ -719,6 +842,7 @@ nav {
   text-transform: uppercase;
   color: var(--overlay1);
   pointer-events: none;
+  white-space: nowrap;
 }
 
 /* ─────────────────────────────────────────────
@@ -732,6 +856,8 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
   font-size: .68rem;
   color: var(--overlay0);
 }
@@ -739,7 +865,7 @@ footer {
 footer a {
   color: var(--mauve);
   text-decoration: none;
-  transition: color .2s;
+  transition: color .3s var(--ease);
 }
 footer a:hover { color: var(--lavender); }
 
@@ -749,29 +875,38 @@ footer a:hover { color: var(--lavender); }
 }
 
 .palette-dot {
-  width: 10px; height: 10px;
+  width: 12px; height: 12px;
   border-radius: 50%;
-  transition: transform .2s;
+  cursor: pointer;
+  transition: transform .4s var(--ease-spring);
 }
-.palette-dot:hover { transform: scale(1.4); }
+.palette-dot:hover  { transform: translateY(-4px) scale(1.5); }
+.palette-dot:active { transform: scale(.8); transition-duration: .1s; }
 
 /* ─────────────────────────────────────────────
-   ANIMATIONS
+   REVEAL ANIMATION (driven by IntersectionObserver)
+   uses the independent `translate` property so it never
+   fights with hover / tilt transforms
 ───────────────────────────────────────────── */
+.d0  { --delay: .05s; }
+.d1  { --delay: .12s; }
+.d2  { --delay: .20s; }
+.d3  { --delay: .28s; }
+.d4  { --delay: .36s; }
+.d5  { --delay: .44s; }
+
 .fade {
   opacity: 0;
-  transform: translateY(18px);
-  animation: fadeUp .55s cubic-bezier(.16,1,.3,1) forwards;
+  translate: 0 26px;
+  transition:
+    opacity   .9s var(--ease) var(--delay, 0s),
+    translate 1s  var(--ease) var(--delay, 0s),
+    transform .4s var(--ease-out),
+    border-color .3s var(--ease),
+    box-shadow .4s var(--ease),
+    background .3s var(--ease);
 }
-@keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-.d0  { animation-delay: .05s; }
-.d1  { animation-delay: .12s; }
-.d2  { animation-delay: .20s; }
-.d3  { animation-delay: .28s; }
-.d4  { animation-delay: .36s; }
-.d5  { animation-delay: .44s; }
+.fade.in { opacity: 1; translate: 0 0; }
 
 /* cursor blink */
 .cursor {
@@ -789,12 +924,28 @@ footer a:hover { color: var(--lavender); }
   .hero { grid-template-columns: 1fr; }
   .avatar-col { display: none; }
   nav { padding: 0 20px; }
+  .nav-links li a { padding: 6px 8px; }
   .page { padding: 0 20px 80px; }
   .mc-viewer-frame { height: 320px; }
+  footer { padding: 24px 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fade { opacity: 1; translate: 0 0; }
 }
 </style>
 </head>
 <body>
+
+<div class="scroll-progress" id="progress"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<canvas id="confetti"></canvas>
 
 <!-- background -->
 <div class="bg-layer">
@@ -804,6 +955,7 @@ footer a:hover { color: var(--lavender); }
   <div class="bg-orb orb-d"></div>
   <div class="bg-orb orb-e"></div>
   <canvas id="dots-canvas"></canvas>
+  <div class="cursor-glow" id="cursor-glow"></div>
 </div>
 
 <!-- nav -->
@@ -823,7 +975,7 @@ footer a:hover { color: var(--lavender); }
   <!-- ── HERO ── -->
   <section id="about" class="hero">
     <div>
-      <p class="hero-eyebrow fade d0">hacker · coder · ml engineer</p>
+      <p class="hero-eyebrow fade d0"><span id="typed">hacker · coder · ml engineer</span></p>
       <h1 class="hero-name fade d1">
         ZD<span class="hero-name-accent">Studios<span class="cursor"></span></span>
       </h1>
@@ -850,12 +1002,12 @@ footer a:hover { color: var(--lavender); }
       </div>
 
       <div class="hero-cta fade d4">
-        <a class="btn btn-mauve" href="https://github.com/ZDStudios" target="_blank">
+        <a class="btn btn-mauve" href="https://github.com/ZDStudios" target="_blank" rel="noopener">
           <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
           View GitHub
         </a>
-        <a class="btn btn-outline" href="https://github.com/ZDStudios/SchoolMod" target="_blank">SchoolMod</a>
-        <a class="btn btn-outline" href="https://github.com/ZDStudios/AIOS" target="_blank">AIOS</a>
+        <a class="btn btn-outline" href="https://github.com/ZDStudios/SchoolMod" target="_blank" rel="noopener">SchoolMod</a>
+        <a class="btn btn-outline" href="https://github.com/ZDStudios/AIOS" target="_blank" rel="noopener">AIOS</a>
         <a class="btn btn-outline" href="mailto:zdstudio12345@gmail.com">
           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
           Email
@@ -886,31 +1038,31 @@ footer a:hover { color: var(--lavender); }
       <span id="last-updated" style="font-size:.65rem;color:var(--overlay1);letter-spacing:.06em;padding-bottom:4px;">fetching live data…</span>
     </div>
     <div class="stats-grid">
-      <div class="stat s-mauve fade d1">
+      <div class="stat s-mauve fade">
         <div class="stat-num" id="stat-repos">—</div>
         <div class="stat-desc">Repositories</div>
       </div>
-      <div class="stat s-blue fade d2">
+      <div class="stat s-blue fade">
         <div class="stat-num" id="stat-stars">—</div>
         <div class="stat-desc">Stars Given</div>
       </div>
-      <div class="stat s-teal fade d3">
+      <div class="stat s-teal fade">
         <div class="stat-num" id="stat-followers">—</div>
         <div class="stat-desc">Followers</div>
       </div>
-      <div class="stat s-green fade d1">
+      <div class="stat s-green fade">
         <div class="stat-num" id="stat-following">—</div>
         <div class="stat-desc">Following</div>
       </div>
-      <div class="stat s-peach fade d2">
+      <div class="stat s-peach fade">
         <div class="stat-num" id="stat-gists">—</div>
         <div class="stat-desc">Public Gists</div>
       </div>
-      <div class="stat s-pink fade d2">
+      <div class="stat s-pink fade">
         <div class="stat-num">3</div>
         <div class="stat-desc">Achievements</div>
       </div>
-      <div class="stat s-pink fade d3">
+      <div class="stat s-pink fade">
         <div class="stat-num" style="font-size:1.6rem">CTFs</div>
         <div class="stat-desc">Security Research</div>
       </div>
@@ -926,7 +1078,7 @@ footer a:hover { color: var(--lavender); }
       <h2 class="section-title">GitHub <span>Achievements</span></h2>
     </div>
     <div class="ach-grid">
-      <div class="ach fade d1">
+      <div class="ach fade">
         <div class="ach-icon-wrap">
           <svg fill="none" viewBox="0 0 24 24" stroke="var(--blue)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
@@ -935,7 +1087,7 @@ footer a:hover { color: var(--lavender); }
         <div class="ach-name">Pull Shark</div>
         <div class="ach-sub">Merged pull requests</div>
       </div>
-      <div class="ach fade d2">
+      <div class="ach fade">
         <div class="ach-icon-wrap">
           <svg fill="none" viewBox="0 0 24 24" stroke="var(--yellow)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
@@ -944,7 +1096,7 @@ footer a:hover { color: var(--lavender); }
         <div class="ach-name">YOLO</div>
         <div class="ach-sub">Merged without review</div>
       </div>
-      <div class="ach fade d3">
+      <div class="ach fade">
         <div class="ach-icon-wrap">
           <svg fill="none" viewBox="0 0 24 24" stroke="var(--green)" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
@@ -986,7 +1138,7 @@ footer a:hover { color: var(--lavender); }
       <p class="section-kicker">stack</p>
       <h2 class="section-title">Skills &amp; <span>Tools</span></h2>
     </div>
-    <div class="skills-block">
+    <div class="skills-block fade">
       <span class="skill" data-c="blue">Python</span>
       <span class="skill" data-c="yellow">JavaScript</span>
       <span class="skill" data-c="blue">TypeScript</span>
@@ -1011,10 +1163,10 @@ footer a:hover { color: var(--lavender); }
       <p class="section-kicker">say hi</p>
       <h2 class="section-title">MC <span>Character</span></h2>
     </div>
-    <div class="mc-viewer-frame" id="mc-viewer">
+    <div class="mc-viewer-frame fade" id="mc-viewer">
       <canvas id="mc-canvas"></canvas>
       <div class="mc-loading">loading skin…</div>
-      <p class="mc-hint">drag to rotate · scroll to zoom</p>
+      <p class="mc-hint">drag to rotate · scroll to zoom · click for a new pose</p>
     </div>
   </section>
 
@@ -1022,63 +1174,414 @@ footer a:hover { color: var(--lavender); }
 
 <!-- footer -->
 <footer>
-  <span>ZDStudios &mdash; <a href="https://github.com/ZDStudios" target="_blank">github.com/ZDStudios</a> &mdash; <a href="mailto:zdstudio12345@gmail.com">zdstudio12345@gmail.com</a></span>
+  <span>ZDStudios &mdash; <a href="https://github.com/ZDStudios" target="_blank" rel="noopener">github.com/ZDStudios</a> &mdash; <a href="mailto:zdstudio12345@gmail.com">zdstudio12345@gmail.com</a></span>
   <div class="footer-palette">
-    <div class="palette-dot" style="background:var(--red)"      title="red"></div>
-    <div class="palette-dot" style="background:var(--peach)"    title="peach"></div>
-    <div class="palette-dot" style="background:var(--yellow)"   title="yellow"></div>
-    <div class="palette-dot" style="background:var(--green)"    title="green"></div>
-    <div class="palette-dot" style="background:var(--teal)"     title="teal"></div>
-    <div class="palette-dot" style="background:var(--sky)"      title="sky"></div>
-    <div class="palette-dot" style="background:var(--sapphire)" title="sapphire"></div>
-    <div class="palette-dot" style="background:var(--blue)"     title="blue"></div>
-    <div class="palette-dot" style="background:var(--lavender)" title="lavender"></div>
-    <div class="palette-dot" style="background:var(--mauve)"    title="mauve"></div>
-    <div class="palette-dot" style="background:var(--pink)"     title="pink"></div>
-    <div class="palette-dot" style="background:var(--flamingo)" title="flamingo"></div>
-    <div class="palette-dot" style="background:var(--rosewater)"title="rosewater"></div>
+    <div class="palette-dot" data-name="red"       style="background:var(--red)"       title="red — click to recolour the site"></div>
+    <div class="palette-dot" data-name="peach"     style="background:var(--peach)"     title="peach — click to recolour the site"></div>
+    <div class="palette-dot" data-name="yellow"    style="background:var(--yellow)"    title="yellow — click to recolour the site"></div>
+    <div class="palette-dot" data-name="green"     style="background:var(--green)"     title="green — click to recolour the site"></div>
+    <div class="palette-dot" data-name="teal"      style="background:var(--teal)"      title="teal — click to recolour the site"></div>
+    <div class="palette-dot" data-name="sky"       style="background:var(--sky)"       title="sky — click to recolour the site"></div>
+    <div class="palette-dot" data-name="sapphire"  style="background:var(--sapphire)"  title="sapphire — click to recolour the site"></div>
+    <div class="palette-dot" data-name="blue"      style="background:var(--blue)"      title="blue — click to recolour the site"></div>
+    <div class="palette-dot" data-name="lavender"  style="background:var(--lavender)"  title="lavender — click to recolour the site"></div>
+    <div class="palette-dot" data-name="mauve"     style="background:#cba6f7"          title="mauve — click to recolour the site"></div>
+    <div class="palette-dot" data-name="pink"      style="background:var(--pink)"      title="pink — click to recolour the site"></div>
+    <div class="palette-dot" data-name="flamingo"  style="background:var(--flamingo)"  title="flamingo — click to recolour the site"></div>
+    <div class="palette-dot" data-name="rosewater" style="background:var(--rosewater)" title="rosewater — click to recolour the site"></div>
   </div>
   <span style="color:var(--overlay0)">catppuccin mocha</span>
 </footer>
 
+<!-- ═════════════════════════════════════════════════════════════
+     FX CORE — reveal, tilt, magnetic buttons, confetti, toast,
+     accent colours, cursor glow, easter eggs
+═════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine   = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const root   = document.documentElement;
+
+  const PALETTE = {
+    red:'#f38ba8', peach:'#fab387', yellow:'#f9e2af', green:'#a6e3a1', teal:'#94e2d5',
+    sky:'#89dceb', sapphire:'#74c7ec', blue:'#89b4fa', lavender:'#b4befe',
+    mauve:'#cba6f7', pink:'#f5c2e7', flamingo:'#f2cdcd', rosewater:'#f5e0dc'
+  };
+  const COLORS = Object.values(PALETTE);
+  const hexRGB = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+
+  const FX = window.FX = {
+    reduce, fine,
+    ptr: { x: innerWidth / 2, y: innerHeight / 2, tx: innerWidth / 2, ty: innerHeight / 2, inside: false, seen: false },
+    accent: hexRGB(PALETTE.mauve)
+  };
+  const P = FX.ptr;
+
+  // ── toast ──────────────────────────────────────────────────
+  const toastEl = document.getElementById('toast');
+  let toastT;
+  FX.toast = (msg) => {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  };
+
+  // ── accent colour (click the footer dots) ─────────────────
+  FX.setAccent = (name, silent) => {
+    const hex = PALETTE[name];
+    if (!hex) return;
+    root.style.setProperty('--mauve', hex);
+    FX.accent = hexRGB(hex);
+    try { localStorage.setItem('zd-accent', name); } catch (e) {}
+    if (!silent) FX.toast('accent → ' + name + ' ✨');
+  };
+  try {
+    const saved = localStorage.getItem('zd-accent');
+    if (saved && PALETTE[saved]) {
+      root.style.transition = 'none';          // restore instantly, no fade on load
+      FX.setAccent(saved, true);
+      void root.offsetWidth;
+      root.style.transition = '';
+    }
+  } catch (e) {}
+
+  // ── scroll reveal ─────────────────────────────────────────
+  let io = null;
+  if ('IntersectionObserver' in window) {
+    io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -5% 0px' });
+  }
+  FX.reveal = (scope) => {
+    (scope || document).querySelectorAll('.fade:not(.in)').forEach((el) => {
+      if (io) io.observe(el); else el.classList.add('in');
+    });
+  };
+  // stagger grid children
+  document.querySelectorAll('.stats-grid, .ach-grid').forEach((g) => {
+    [...g.children].forEach((c, i) => c.style.setProperty('--delay', (i * 0.07) + 's'));
+  });
+  FX.reveal();
+
+  // ── count-up numbers ──────────────────────────────────────
+  FX.countUp = (el, to, dur, from) => {
+    dur = dur || 1100; from = from || 0;
+    if (reduce || from === to) { el.textContent = to; return; }
+    const t0 = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const e = p < 1 ? 1 - Math.pow(2, -10 * p) : 1;
+      el.textContent = Math.round(from + (to - from) * e);
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  };
+  if ('IntersectionObserver' in window) {
+    const statIO = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        statIO.unobserve(en.target);
+        const n = en.target.querySelector('.stat-num[data-target]');
+        if (n) { n.dataset.counted = '1'; FX.countUp(n, Number(n.dataset.target), 1200, 0); }
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('#stats .stat').forEach((s) => statIO.observe(s));
+  }
+
+  // ── scroll progress + active nav link ─────────────────────
+  const bar = document.getElementById('progress');
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const h = document.documentElement.scrollHeight - innerHeight;
+      bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(scrollY / h, 1) : 0) + ')';
+      ticking = false;
+    });
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  const links = [...document.querySelectorAll('.nav-links a')];
+  if ('IntersectionObserver' in window) {
+    const secIO = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        links.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id));
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    links.forEach((a) => { const s = document.querySelector(a.getAttribute('href')); if (s) secIO.observe(s); });
+  }
+
+  // ── cursor glow + parallax orbs (smoothed) ────────────────
+  const glow  = document.getElementById('cursor-glow');
+  const orbs  = [...document.querySelectorAll('.bg-orb')];
+  const DEPTH = [-0.05, 0.04, 0.06, -0.04, 0.03];
+  let running = false, last = 0;
+  function loop(now) {
+    const dt = Math.min(3, (now - last) / 16.67 || 1);
+    last = now;
+    const k = 1 - Math.pow(1 - 0.12, dt);
+    P.x += (P.tx - P.x) * k;
+    P.y += (P.ty - P.y) * k;
+    glow.style.translate = P.x + 'px ' + P.y + 'px';
+    const cx = P.x - innerWidth / 2, cy = P.y - innerHeight / 2;
+    for (let i = 0; i < orbs.length; i++) {
+      orbs[i].style.translate = (cx * DEPTH[i]) + 'px ' + (cy * DEPTH[i]) + 'px';
+    }
+    if (Math.abs(P.tx - P.x) > 0.3 || Math.abs(P.ty - P.y) > 0.3) requestAnimationFrame(loop);
+    else running = false;
+  }
+  function kick() {
+    glow.classList.toggle('on', P.inside);
+    if (!running && !reduce && fine) { running = true; last = performance.now(); requestAnimationFrame(loop); }
+  }
+
+  // ── 3D tilt + card spotlight + magnetic buttons ───────────
+  const TILT_SEL = '.project, .stat, .ach, .avatar-frame';
+  let tiltEl = null, magEl = null;
+  function resetTilt() {
+    if (tiltEl) { tiltEl.style.transform = ''; tiltEl = null; }
+    if (magEl)  { magEl.style.translate = '';  magEl = null; }
+  }
+
+  if (fine) {
+    addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch') return;
+      P.tx = e.clientX; P.ty = e.clientY; P.inside = true;
+      if (!P.seen) { P.seen = true; P.x = P.tx; P.y = P.ty; }
+      kick();
+      if (reduce) return;
+
+      const t = e.target;
+      if (!t || !t.closest) return;
+
+      const card = t.closest(TILT_SEL);
+      if (card !== tiltEl) { if (tiltEl) tiltEl.style.transform = ''; tiltEl = card; }
+      if (card) {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        const max = card.classList.contains('avatar-frame') ? 14 : 6;
+        card.style.transform =
+          'perspective(900px) rotateX(' + ((0.5 - py) * max).toFixed(2) + 'deg) rotateY(' +
+          ((px - 0.5) * max).toFixed(2) + 'deg) translateY(-4px)';
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      }
+
+      const btn = t.closest('.btn');
+      if (btn !== magEl) { if (magEl) magEl.style.translate = ''; magEl = btn; }
+      if (btn) {
+        const r = btn.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width / 2)) * 0.22;
+        const dy = (e.clientY - (r.top + r.height / 2)) * 0.30;
+        btn.style.translate = dx.toFixed(1) + 'px ' + dy.toFixed(1) + 'px';
+      }
+    }, { passive: true });
+
+    root.addEventListener('mouseleave', () => { P.inside = false; kick(); resetTilt(); });
+  }
+
+  // ── button ripple ─────────────────────────────────────────
+  document.addEventListener('pointerdown', (e) => {
+    const b = e.target.closest && e.target.closest('.btn');
+    if (!b || reduce) return;
+    const r = b.getBoundingClientRect();
+    const s = Math.max(r.width, r.height) * 2;
+    const sp = document.createElement('span');
+    sp.className = 'ripple';
+    sp.style.cssText = 'width:' + s + 'px;height:' + s + 'px;left:' + (e.clientX - r.left - s / 2) + 'px;top:' + (e.clientY - r.top - s / 2) + 'px';
+    b.appendChild(sp);
+    sp.addEventListener('animationend', () => sp.remove());
+  });
+
+  // ── confetti ──────────────────────────────────────────────
+  const cc = document.getElementById('confetti');
+  const cx = cc.getContext('2d');
+  let parts = [], craf = 0, clast = 0;
+  function sizeC() {
+    const d = Math.min(devicePixelRatio || 1, 2);
+    cc.width = innerWidth * d; cc.height = innerHeight * d;
+    cx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  sizeC();
+  addEventListener('resize', sizeC);
+
+  function tickC(now) {
+    const dt = Math.min(3, (now - clast) / 16.67 || 1);
+    clast = now;
+    cx.clearRect(0, 0, innerWidth, innerHeight);
+    parts = parts.filter((p) => p.life > 0 && p.y < innerHeight + 40);
+    for (const p of parts) {
+      p.vy += 0.24 * dt;
+      p.vx *= Math.pow(0.992, dt);
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.rot += p.vr * dt; p.life -= dt;
+      cx.save();
+      cx.globalAlpha = Math.min(1, p.life / 30);
+      cx.translate(p.x, p.y);
+      cx.rotate(p.rot);
+      cx.fillStyle = p.c;
+      cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      cx.restore();
+    }
+    if (parts.length) craf = requestAnimationFrame(tickC);
+    else { craf = 0; cx.clearRect(0, 0, innerWidth, innerHeight); }
+  }
+  FX.confetti = (x, y, n, spread, dir) => {
+    if (reduce) return;
+    n = n || 60;
+    spread = spread == null ? Math.PI * 2 : spread;
+    dir = dir == null ? -Math.PI / 2 : dir;
+    for (let i = 0; i < n; i++) {
+      const a = dir + (Math.random() - 0.5) * spread;
+      const s = 4 + Math.random() * 9;
+      parts.push({
+        x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+        w: 5 + Math.random() * 6, h: 3 + Math.random() * 5,
+        rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.35,
+        life: 90 + Math.random() * 70,
+        c: COLORS[(Math.random() * COLORS.length) | 0]
+      });
+    }
+    if (!craf) { clast = performance.now(); craf = requestAnimationFrame(tickC); }
+  };
+  FX.rain = () => {
+    let n = 0;
+    const id = setInterval(() => {
+      FX.confetti(Math.random() * innerWidth, -10, 14, Math.PI * 0.6, Math.PI / 2);
+      if (++n > 18) clearInterval(id);
+    }, 110);
+  };
+
+  // ── click interactions ────────────────────────────────────
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+
+    if (t.closest('.nav-wordmark')) scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (t.closest('.hero-name')) FX.confetti(e.clientX, e.clientY, 70);
+
+    const av = t.closest('.avatar-frame');
+    if (av) {
+      const r = av.getBoundingClientRect();
+      FX.confetti(r.left + r.width / 2, r.top + r.height / 2, 60);
+      if (!reduce && av.animate) {
+        av.animate(
+          [{ scale: 1 }, { scale: 0.9 }, { scale: 1.07 }, { scale: 1 }],
+          { duration: 650, easing: 'cubic-bezier(.34,1.56,.64,1)' }
+        );
+      }
+    }
+
+    const sk = t.closest('.skill');
+    if (sk) {
+      const r = sk.getBoundingClientRect();
+      FX.confetti(r.left + r.width / 2, r.top + r.height / 2, 14, Math.PI * 1.2);
+      if (!reduce && sk.animate) {
+        sk.animate(
+          [{ scale: 1 }, { scale: 1.2, rotate: '-4deg' }, { scale: 1 }],
+          { duration: 420, easing: 'cubic-bezier(.34,1.56,.64,1)' }
+        );
+      }
+    }
+
+    const dot = t.closest('.palette-dot');
+    if (dot) {
+      FX.setAccent(dot.dataset.name);
+      const r = dot.getBoundingClientRect();
+      FX.confetti(r.left + r.width / 2, r.top, 20, Math.PI * 0.9);
+    }
+  });
+
+  // ── typewriter eyebrow ────────────────────────────────────
+  const typed = document.getElementById('typed');
+  if (typed && !reduce) {
+    const phrases = [
+      'hacker · coder · ml engineer',
+      'ctf player · exploit dev',
+      'lead dev @ SchoolMod',
+      'low-level · neural nets · linux'
+    ];
+    let pi = 0;
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    (async function () {
+      await sleep(3500);
+      while (true) {
+        pi = (pi + 1) % phrases.length;
+        while (typed.textContent.length) { typed.textContent = typed.textContent.slice(0, -1); await sleep(22); }
+        const p = phrases[pi];
+        for (let i = 1; i <= p.length; i++) { typed.textContent = p.slice(0, i); await sleep(42); }
+        await sleep(2600);
+      }
+    })();
+  }
+
+  // ── konami code ───────────────────────────────────────────
+  const SEQ = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let kpos = 0;
+  addEventListener('keydown', (e) => {
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    kpos = k === SEQ[kpos] ? kpos + 1 : (k === SEQ[0] ? 1 : 0);
+    if (kpos === SEQ.length) {
+      kpos = 0;
+      FX.toast('🎮 konami unlocked · +30 lives');
+      FX.rain();
+    }
+  });
+  console.log('%cpsst… ↑ ↑ ↓ ↓ ← → ← → B A', 'color:#cba6f7;font-weight:bold');
+})();
+</script>
+
+<!-- ═════════════════════════════════════════════════════════════
+     GITHUB DATA, AVATAR, PROJECT CARDS
+═════════════════════════════════════════════════════════════ -->
 <script>
   // ─────────────────────────────────────────────────────────────────
   // CONFIG
   // ─────────────────────────────────────────────────────────────────
+  // Same six repos (and order) as your pinned repos on GitHub
   const PINNED_NAMES = [
-    'SchoolMod', 'AIOS', 'INDEX', 'scratchpy-studio', 'WebRunner', 'Seqta-MCP-Server'
+    'SchoolMod', 'AIOS', 'Flipper-Zero-Emulator', 'scratchpy-studio', 'INDEX', 'Seqta-MCP-Server'
   ];
 
   const FALLBACK_REPOS = [
-    { name:'SchoolMod',         html_url:'https://github.com/ZDStudios/SchoolMod',         description:'SchoolMod is an open-source browser extension / script that enhances the most popular school platforms with new features, quality-of-life improvements, and powerful integrations — all in one place.', language:'TypeScript', stargazers_count:2, forks_count:0, updated_at:'2026-01-01' },
-    { name:'AIOS',               html_url:'https://github.com/ZDStudios/AIOS',               description:'Nine open-source AI projects. One operating system. One Control Room. opencode + hermes + openclaw + CrewAI + claude-code + LifeOS + Fabric + Ponytail + Ruflo — auto-configured, self-healing, Docker.', language:'TypeScript', stargazers_count:3, forks_count:0, updated_at:'2026-01-01' },
-    { name:'INDEX',               html_url:'https://github.com/ZDStudios/INDEX',               description:'Immersive Navigation Dynamic Embedding X-Ray',                                                                                                                                                          language:'Python',     stargazers_count:1, forks_count:0, updated_at:'2026-01-01' },
-    { name:'scratchpy-studio',    html_url:'https://github.com/ZDStudios/scratchpy-studio',    description:'A single-file Scratch-style visual editor that writes, saves and runs real Python. Drag blocks, get code. Turns any PyPI package into blocks, imports existing .py files, and speaks MCP so an AI can use it.', language:'Python', stargazers_count:1, forks_count:0, updated_at:'2026-01-01' },
-    { name:'WebRunner',           html_url:'https://github.com/ZDStudios/WebRunner',           description:'Self-hosted job scheduler with a web dashboard. Build workflows visually from blocks — run commands, call APIs, restart services on a schedule. Linux, Windows and Docker.',                          language:'Python',     stargazers_count:1, forks_count:0, updated_at:'2026-01-01' },
-    { name:'Seqta-MCP-Server',    html_url:'https://github.com/ZDStudios/Seqta-MCP-Server',    description:'A Simple MCP Server for Seqta',                                                                                                                                                                          language:'Python',     stargazers_count:0, forks_count:0, updated_at:'2026-01-01' },
+    { name:'SchoolMod',             html_url:'https://github.com/ZDStudios/SchoolMod',             description:'SchoolMod is an open-source browser extension / script that enhances the most popular school platforms with new features, quality-of-life improvements, and powerful integrations — all in one place.', language:'TypeScript', stargazers_count:2, forks_count:0 },
+    { name:'AIOS',                  html_url:'https://github.com/ZDStudios/AIOS',                  description:'Nine open-source AI projects. One operating system. One Control Room. opencode + hermes + openclaw + CrewAI + claude-code + LifeOS + Fabric + Ponytail + Ruflo — auto-configured, self-healing, Docker.', language:'TypeScript', stargazers_count:5, forks_count:0 },
+    { name:'Flipper-Zero-Emulator', html_url:'https://github.com/ZDStudios/Flipper-Zero-Emulator', description:'A Simple emulator for emulating the flipper zeros functionality on PC',                                                                                                                                language:'Python',     stargazers_count:7, forks_count:0 },
+    { name:'scratchpy-studio',      html_url:'https://github.com/ZDStudios/scratchpy-studio',      description:'A single-file Scratch-style visual editor that writes, saves and runs real Python. Drag blocks, get code. Turns any PyPI package into blocks, imports existing .py files, and speaks MCP so an AI can use it.', language:'Python', stargazers_count:1, forks_count:1 },
+    { name:'INDEX',                 html_url:'https://github.com/ZDStudios/INDEX',                 description:'Immersive Navigation Dynamic Embedding X-Ray',                                                                                                                                                        language:'Python',     stargazers_count:1, forks_count:0 },
+    { name:'Seqta-MCP-Server',      html_url:'https://github.com/ZDStudios/Seqta-MCP-Server',      description:'A Simple MCP Server for Seqta',                                                                                                                                                                      language:'Python',     stargazers_count:0, forks_count:0 },
   ];
 
   // Known-correct values from your profile — shown instantly on load
   const KNOWN = { repos:184, stars:57, followers:7, following:13, gists:0 };
 
   const LANG_COLORS = {
-    Python:'#3572A5', JavaScript:'#f1e05a', TypeScript:'#2b7489',
+    Python:'#3572A5', JavaScript:'#f1e05a', TypeScript:'#3178c6',
     HTML:'#e34c26', CSS:'#563d7c', Shell:'#89e051',
     Rust:'#dea584', C:'#555555', 'C++':'#f34b7d', Go:'#00ADD8',
   };
 
   const ARROW = `<svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>`;
 
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
   // ── AVATAR ───────────────────────────────────────────────────────
   // Loads an image onto a canvas and flood-fills transparency in from
   // every edge pixel, so only the background (whatever touches the
-  // border) gets cleared — corners included, however light or slightly
-  // off-white they are — while any light colors that are part of the
-  // actual artwork (not connected to an edge) are left alone. Used for
-  // both the hero avatar AND the browser-tab favicon.
+  // border) gets cleared — corners included — while any light colours
+  // that are part of the actual artwork are left alone. Used for both
+  // the hero avatar AND the browser-tab favicon.
   function stripWhiteBackground(url, onDone) {
     const probe = new Image();
-    probe.crossOrigin = 'anonymous'; // avatars.githubusercontent.com sends CORS headers
+    probe.crossOrigin = 'anonymous';
     probe.onload = () => {
       try {
         const canvas = document.createElement('canvas');
@@ -1093,15 +1596,9 @@ footer a:hover { color: var(--lavender); }
         const visited = new Uint8Array(w * h);
         const stack = [];
 
-        // "background-ish" = light AND low-saturation, so it catches
-        // white/off-white/light-gray but leaves actual colored or dark
-        // artwork (eyes, outlines, etc.) untouched.
-        // "background-ish" = low color saturation — catches white, black,
-        // and every gray in between (including anti-aliased edge pixels),
-        // so the fill can tunnel from a white area straight through to a
-        // black area without an intermediate gray ring blocking it. Actual
-        // artwork colors (blue, orange, purple, etc.) are saturated enough
-        // to stop the fill wherever it meets them.
+        // "background-ish" = low colour saturation — catches white, black
+        // and every gray in between so the fill can tunnel through
+        // anti-aliased edges. Saturated artwork colours stop the fill.
         function isBackgroundish(p) {
           const r = data[p], g = data[p + 1], b = data[p + 2];
           const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
@@ -1118,7 +1615,7 @@ footer a:hover { color: var(--lavender); }
           if (visited[idx]) continue;
           visited[idx] = 1;
           const p = idx * 4;
-          if (!isBackgroundish(p)) continue; // hit the artwork — stop spreading here
+          if (!isBackgroundish(p)) continue;
           data[p + 3] = 0;
           stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
         }
@@ -1126,7 +1623,6 @@ footer a:hover { color: var(--lavender); }
         ctx.putImageData(frame, 0, 0);
         onDone(canvas.toDataURL('image/png'));
       } catch (e) {
-        // canvas got tainted (CORS hiccup) — fall back to the plain image
         onDone(url);
       }
     };
@@ -1151,33 +1647,26 @@ footer a:hover { color: var(--lavender); }
     stripWhiteBackground(url, (dataUrl) => { fav.href = dataUrl; });
   }
 
-  // Show avatar + favicon immediately from known URLs — no waiting for API
   loadAvatar('https://avatars.githubusercontent.com/u/121779558?v=4&s=200');
   loadFavicon('https://avatars.githubusercontent.com/u/121779558?v=4&s=32');
 
-  // ── STATS — shown instantly from KNOWN, then silently updated ────
-  // Write directly without animation first (no flash/opacity tricks)
+  // ── STATS — shown instantly from KNOWN, count up when scrolled into view ──
   function setStatEl(id, val) {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = val;
+    el.dataset.target = val;
   }
 
-  function animateStat(id, target, duration = 800) {
+  function animateStat(id, target) {
     const el = document.getElementById(id);
     if (!el || typeof target !== 'number') return;
-    const start = performance.now();
-    const from  = parseInt(el.textContent) || 0;
-    if (from === target) return; // no change, no animation
-    (function tick(now) {
-      const p = Math.min((now - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.round(from + (target - from) * ease);
-      if (p < 1) requestAnimationFrame(tick);
-    })(start);
+    const from = parseInt(el.textContent) || 0;
+    el.dataset.target = target;
+    if (!el.dataset.counted) { el.textContent = target; return; } // hasn't been revealed yet
+    if (from !== target) FX.countUp(el, target, 900, from);
   }
 
-  // Paint known values immediately — zero flash
   setStatEl('stat-repos',     KNOWN.repos);
   setStatEl('stat-stars',     KNOWN.stars);
   setStatEl('stat-followers', KNOWN.followers);
@@ -1185,82 +1674,90 @@ footer a:hover { color: var(--lavender); }
   setStatEl('stat-gists',     KNOWN.gists);
 
   // ── REPOS ────────────────────────────────────────────────────────
+  let lastSig = '';
   function renderRepos(repos, live) {
     const grid = document.getElementById('projects-grid');
     if (!grid) return;
-    const delays = ['d1','d2','d3','d4','d3','d2'];
-    grid.innerHTML = repos.map((r, i) => {
-      const lang    = r.language || 'Code';
-      const color   = LANG_COLORS[lang] || 'var(--overlay1)';
-      const stars   = r.stargazers_count || 0;
-      const forks   = r.forks_count || 0;
-      const raw     = r.description || 'No description yet.';
-      const desc    = raw.length > 115 ? raw.slice(0, 115) + '…' : raw;
-      const updated = new Date(r.updated_at).toLocaleDateString('en-AU', { month:'short', year:'numeric' });
-      return `<a class="project fade ${delays[i]}" href="${r.html_url}" target="_blank">
-        <div class="project-name">${r.name}${ARROW}</div>
-        <p class="project-desc">${desc}</p>
-        <div class="project-foot">
-          <span class="lang-dot" style="--lang-col:${color}">${lang}</span>
-          <span style="color:var(--yellow)">&#9733; ${stars}</span>
-          ${forks ? `<span style="color:var(--teal)">&#8918; ${forks}</span>` : ''}
-          <span style="margin-left:auto;color:var(--overlay1)">${updated}</span>
-        </div>
-      </a>`;
-    }).join('');
+
+    // only touch the DOM when something actually changed — no flicker, no replayed animations
+    const sig = JSON.stringify(repos.map(r => [r.name, r.description, r.language, r.stargazers_count, r.forks_count, r.updated_at]));
+    if (sig !== lastSig) {
+      lastSig = sig;
+      const instant = !!grid.querySelector('.project.in'); // already revealed? swap in place, no replay
+      grid.innerHTML = repos.map((r, i) => {
+        const lang    = r.language || 'Code';
+        const color   = LANG_COLORS[lang] || '#7f849c';
+        const stars   = r.stargazers_count || 0;
+        const forks   = r.forks_count || 0;
+        const raw     = r.description || 'No description yet.';
+        const desc    = raw.length > 120 ? raw.slice(0, 120) + '…' : raw;
+        const updated = (live && r.updated_at)
+          ? new Date(r.updated_at).toLocaleDateString('en-AU', { month:'short', year:'numeric' })
+          : '';
+        return `<a class="project fade${instant ? ' in' : ''}" style="--accent:${color};--delay:${(i * 0.08).toFixed(2)}s" href="${esc(r.html_url)}" target="_blank" rel="noopener">
+          <div class="project-name">${esc(r.name)}${ARROW}</div>
+          <p class="project-desc">${esc(desc)}</p>
+          <div class="project-foot">
+            <span class="lang-dot" style="--lang-col:${color}">${esc(lang)}</span>
+            <span style="color:var(--yellow)">&#9733; ${stars}</span>
+            ${forks ? `<span style="color:var(--teal)">&#8918; ${forks}</span>` : ''}
+            <span style="margin-left:auto;color:var(--overlay1)">${updated}</span>
+          </div>
+        </a>`;
+      }).join('');
+      if (!instant) FX.reveal(grid);
+    }
+
     const b = document.getElementById('repos-updated');
     if (b) b.textContent = live
       ? 'live \u00b7 updated ' + new Date().toLocaleTimeString()
       : 'open in browser for live data';
   }
 
-  // Paint fallback repos immediately so grid is never blank
+  // Paint fallback repos immediately so the grid is never blank
   renderRepos(FALLBACK_REPOS, false);
 
   // ── MAIN FETCH ───────────────────────────────────────────────────
+  async function ghJSON(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('GitHub ' + r.status);
+    return r.json();
+  }
+
   async function syncGitHub() {
     try {
-      const [userRes, reposRes] = await Promise.all([
-        fetch('https://api.github.com/users/ZDStudios'),
-        fetch('https://api.github.com/users/ZDStudios/repos?per_page=100&sort=pushed'),
+      const [user, repos] = await Promise.all([
+        ghJSON('https://api.github.com/users/ZDStudios'),
+        ghJSON('https://api.github.com/users/ZDStudios/repos?per_page=100&sort=pushed'),
       ]);
-      if (!userRes.ok) throw new Error('rate-limited or blocked');
-
-      const user  = await userRes.json();
-      const repos = await reposRes.json();
       if (!Array.isArray(repos)) throw new Error('bad repos payload');
 
-      // Update avatar + favicon from freshest API URL
       if (user.avatar_url) {
         loadAvatar(user.avatar_url + '&s=200');
         loadFavicon(user.avatar_url + '&s=32');
       }
 
-      // Smoothly animate only stats that actually changed
-      const totalStars = repos.reduce((n, r) => n + (r.stargazers_count || 0), 0);
       animateStat('stat-repos',     user.public_repos);
       animateStat('stat-followers', user.followers);
       animateStat('stat-following', user.following);
       animateStat('stat-gists',     user.public_gists);
-      // stars-given: use the known 57 since API doesn't expose it directly
-      // (user.public_repos starred count not in REST response)
-      animateStat('stat-stars', 57);
+      animateStat('stat-stars', KNOWN.stars); // stars-given isn't in the REST user payload
 
-      // Update last-updated badge
       const sb = document.getElementById('last-updated');
       if (sb) sb.textContent = 'live \u00b7 updated ' + new Date().toLocaleTimeString();
 
-      // Build name→repo map for O(1) lookup
       const byName = {};
       repos.forEach(r => { byName[r.name] = r; });
 
-      // Build pinned list in exact requested order
-      // If a repo isn't found in API (private / doesn't exist yet), keep fallback
-      const pinned = PINNED_NAMES.map((name, i) => byName[name] || FALLBACK_REPOS[i]);
+      // you've got 180+ repos, so a pinned one might not be in the first 100 — fetch any missing one directly
+      const pinned = await Promise.all(PINNED_NAMES.map(async (name, i) => {
+        if (byName[name]) return byName[name];
+        try { return await ghJSON('https://api.github.com/repos/ZDStudios/' + name); }
+        catch (e) { return FALLBACK_REPOS[i]; }
+      }));
       renderRepos(pinned, true);
 
     } catch (err) {
-      // API blocked (sandbox) or rate-limited — known values already painted, just update badge
       const sb = document.getElementById('last-updated');
       if (sb) sb.textContent = 'open in browser for live data';
       const rb = document.getElementById('repos-updated');
@@ -1268,105 +1765,130 @@ footer a:hover { color: var(--lavender); }
     }
   }
 
-  // Fetch live data — don't await so page doesn't wait on network
   syncGitHub();
-  setInterval(syncGitHub, 60_000);
+  // every 5 min, and only while the tab is visible (GitHub's unauthenticated limit is 60 req/hr)
+  setInterval(() => { if (!document.hidden) syncGitHub(); }, 300000);
 </script>
 
-<!-- background dot grid — brightens and grows near the mouse -->
+<!-- background dot grid — smooth cursor follow, flicker, and click ripples -->
 <script>
 (function initDots() {
   const canvas = document.getElementById('dots-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  const FX = window.FX;
+  const P  = FX.ptr;
 
-  const SPACING = 32;   // matches the old CSS background-size
-  const OFFSET  = 16;   // centres dots the same way the old radial-gradient did
-  const REACT_R = 140;  // how far out the mouse influence reaches, in px
-  const BASE_R  = 1;    // resting dot radius
-  const HOT_R   = 3.2;  // dot radius right under the cursor
-  const BASE_A  = 0.18; // resting opacity (matches the old CSS layer opacity)
-  const HOT_A   = 0.9;  // opacity right under the cursor
+  const SPACING = 32, OFFSET = 16, REACT_R = 150;
+  const BASE_R = 1, HOT_R = 3.4, BASE_A = 0.18, HOT_A = 0.9, TAU = Math.PI * 2;
+  const BASE_RGB = [69, 71, 90]; // --surface1
 
-  function cssVarRGB(name) {
-    const hex = getComputedStyle(document.documentElement).getPropertyValue(name).trim().replace('#', '');
-    const n = parseInt(hex, 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  }
-  const baseRGB = cssVarRGB('--surface1');
-  const hotRGB  = cssVarRGB('--lavender');
-
-  // Deterministic per-dot pseudo-random value in [0,1), so every dot gets
-  // its own stable flicker phase/speed instead of a synced pulse.
   function hash2(i, j) {
     const n = Math.sin(i * 127.1 + j * 311.7) * 43758.5453;
     return n - Math.floor(n);
   }
 
-  let mouse = null; // {x,y} in CSS px, or null when the mouse isn't hovering
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
-  let W = 0, H = 0;
+  let W = 0, H = 0, dirty = true;
+  let sx = 0, sy = 0, inf = 0, last = 0;
+  const ripples = [];
 
   function resize() {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
     canvas.width  = W * dpr;
     canvas.height = H * dpr;
     canvas.style.width  = W + 'px';
     canvas.style.height = H + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    dirty = true;
   }
   resize();
-  window.addEventListener('resize', resize);
+  addEventListener('resize', resize);
 
-  window.addEventListener('mousemove', (e) => { mouse = { x: e.clientX, y: e.clientY }; });
-  window.addEventListener('mouseleave', () => { mouse = null; });
+  // click anywhere → a ripple travels across the dot grid
+  if (!FX.reduce) {
+    addEventListener('pointerdown', (e) => {
+      ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+      if (ripples.length > 6) ripples.shift();
+    });
+  }
 
   function draw(now) {
-    const t = (now || 0) / 1000; // seconds, for the flicker animation
+    const dt = Math.min(3, (now - last) / 16.67 || 1);
+    last = now;
+
+    // smooth the cursor + fade the influence in/out
+    if (P.inside) {
+      if (!sx && !sy) { sx = P.tx; sy = P.ty; }
+      const k = 1 - Math.pow(1 - 0.2, dt);
+      sx += (P.tx - sx) * k; sy += (P.ty - sy) * k;
+    }
+    const target = P.inside && !FX.reduce ? 1 : 0;
+    inf += (target - inf) * (1 - Math.pow(1 - 0.12, dt));
+    if (target === 0 && inf < 0.003) inf = 0;
+
+    while (ripples.length && now - ripples[0].t > 1700) ripples.shift();
+
+    // nothing moving? skip the redraw entirely
+    if (!dirty && inf === 0 && !ripples.length) { requestAnimationFrame(draw); return; }
+    dirty = false;
+
+    const hot = FX.accent;
+    const t = now / 1000;
     ctx.clearRect(0, 0, W, H);
+
     const cols = Math.ceil(W / SPACING) + 1;
     const rows = Math.ceil(H / SPACING) + 1;
+    const lit = [];
 
+    ctx.beginPath();
     for (let j = 0; j < rows; j++) {
       const y = OFFSET + j * SPACING;
-      // skip rows nowhere near the cursor's Y — cheap early-out
-      const rowNearMouse = mouse && Math.abs(y - mouse.y) < REACT_R;
-
+      const rowNear = inf > 0 && Math.abs(y - sy) < REACT_R;
       for (let i = 0; i < cols; i++) {
         const x = OFFSET + i * SPACING;
-        let r = BASE_R, a = BASE_A, color = baseRGB;
+        let e = 0;
 
-        if (rowNearMouse) {
-          const dx = x - mouse.x, dy = y - mouse.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist < REACT_R) {
-            const dt = 1 - dist / REACT_R;
-            let eased = dt * dt;
-
-            // slow, randomized flicker — each dot has its own phase and
-            // speed so lit-up dots fade in and out independently
-            const phase = hash2(i, j) * Math.PI * 2;
-            const speed = 0.4 + hash2(j, i) * 0.6; // ~0.4–1.0 rad/s (slow)
+        if (rowNear) {
+          const dx = x - sx, dy = y - sy;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < REACT_R) {
+            const dtn = 1 - d / REACT_R;
+            const phase = hash2(i, j) * TAU;
+            const speed = 0.4 + hash2(j, i) * 0.6;
             const flicker = 0.5 + 0.5 * Math.sin(t * speed + phase);
-            eased *= 0.25 + 0.75 * flicker; // never fully off, just dims
-
-            r = BASE_R + eased * (HOT_R - BASE_R);
-            a = BASE_A + eased * (HOT_A - BASE_A);
-            color = [
-              Math.round(baseRGB[0] + (hotRGB[0] - baseRGB[0]) * eased),
-              Math.round(baseRGB[1] + (hotRGB[1] - baseRGB[1]) * eased),
-              Math.round(baseRGB[2] + (hotRGB[2] - baseRGB[2]) * eased),
-            ];
+            e = dtn * dtn * inf * (0.25 + 0.75 * flicker);
           }
         }
 
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${a})`;
-        ctx.fill();
+        for (let k = 0; k < ripples.length; k++) {
+          const r = ripples[k];
+          const age = (now - r.t) / 1000;
+          const ring = age * 620;
+          const dx = x - r.x, dy = y - r.y;
+          const q = 1 - Math.abs(Math.sqrt(dx * dx + dy * dy) - ring) / 80;
+          if (q > 0) e = Math.max(e, q * q * (1 - age / 1.7));
+        }
+
+        if (e < 0.01) { ctx.moveTo(x + BASE_R, y); ctx.arc(x, y, BASE_R, 0, TAU); }
+        else lit.push(x, y, e);
       }
+    }
+    // all resting dots in one fill — much cheaper than 2000 separate ones
+    ctx.fillStyle = 'rgba(' + BASE_RGB[0] + ',' + BASE_RGB[1] + ',' + BASE_RGB[2] + ',' + BASE_A + ')';
+    ctx.fill();
+
+    for (let n = 0; n < lit.length; n += 3) {
+      const e = lit[n + 2];
+      const r = BASE_R + e * (HOT_R - BASE_R);
+      const a = BASE_A + e * (HOT_A - BASE_A);
+      const c0 = Math.round(BASE_RGB[0] + (hot[0] - BASE_RGB[0]) * e);
+      const c1 = Math.round(BASE_RGB[1] + (hot[1] - BASE_RGB[1]) * e);
+      const c2 = Math.round(BASE_RGB[2] + (hot[2] - BASE_RGB[2]) * e);
+      ctx.beginPath();
+      ctx.arc(lit[n], lit[n + 1], r, 0, TAU);
+      ctx.fillStyle = 'rgba(' + c0 + ',' + c1 + ',' + c2 + ',' + a + ')';
+      ctx.fill();
     }
     requestAnimationFrame(draw);
   }
@@ -1384,10 +1906,7 @@ footer a:hover { color: var(--lavender); }
   }, 8000);
 </script>
 
-<!-- MC character viewer — powered by skinview3d (bs-community/skinview3d),
-     a public, actively-maintained Minecraft skin renderer, instead of a
-     hand-rolled one. Handles UV mapping, slim/classic detection, and
-     drag-to-rotate / scroll-to-zoom controls out of the box. -->
+<!-- MC character viewer — powered by skinview3d (bs-community/skinview3d) -->
 <script type="module">
   import * as skinview3d from 'https://cdn.jsdelivr.net/npm/skinview3d@3.4.1/+esm';
 
@@ -1420,15 +1939,39 @@ footer a:hover { color: var(--lavender); }
 
     Promise.resolve(viewer.loadSkin(MC_SKIN_URL)).then(hideLoading).catch(showError);
 
-    // stop the auto-spin once the person starts dragging (skinview3d
-    // ships its own orbit-style controls for the actual rotate/zoom)
-    canvas.addEventListener('pointerdown', () => { viewer.autoRotate = false; });
+    // click (without dragging) to cycle through poses
+    const poses = ['WalkingAnimation', 'RunningAnimation', 'IdleAnimation', 'FlyingAnimation']
+      .filter((n) => typeof skinview3d[n] === 'function');
+    let pi = 0, down = null;
+
+    function nextPose() {
+      if (poses.length < 2) return;
+      pi = (pi + 1) % poses.length;
+      viewer.animation = new skinview3d[poses[pi]]();
+      if (window.FX) FX.toast('pose: ' + poses[pi].replace('Animation', '').toLowerCase() + ' 🕺');
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      viewer.autoRotate = false; // stop the auto-spin once the person starts interacting
+      down = { x: e.clientX, y: e.clientY };
+    });
+    canvas.addEventListener('pointerup', (e) => {
+      if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5) nextPose();
+      down = null;
+    });
+
+    // don't render the 3D scene while it's off-screen
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((es) => {
+        try { viewer.renderPaused = !es[0].isIntersecting; } catch (e) {}
+      }).observe(container);
+    }
 
     function onResize() {
       const w = container.clientWidth, h = container.clientHeight;
       if (w && h) { viewer.width = w; viewer.height = h; }
     }
-    window.addEventListener('resize', onResize);
+    addEventListener('resize', onResize);
     if (window.ResizeObserver) new ResizeObserver(onResize).observe(container);
   }
 
