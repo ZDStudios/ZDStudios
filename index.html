@@ -411,79 +411,6 @@ nav {
 }
 .btn-outline:hover { border-color: var(--surface2); color: var(--text); background: var(--surface0); }
 
-/* ── play games button ── */
-.btn-play {
-  color: var(--crust);
-  background: linear-gradient(100deg, var(--green), var(--teal), var(--sky), var(--green));
-  background-size: 250% 100%;
-  animation: play-slide 5s linear infinite;
-  box-shadow: 0 0 0 0 transparent;
-}
-.btn-play:hover { box-shadow: 0 6px 28px color-mix(in srgb, var(--green) 40%, transparent); filter: brightness(1.08); }
-.btn-play .pad { display: inline-block; transition: transform .5s var(--ease-spring); }
-.btn-play:hover .pad { transform: rotate(-14deg) scale(1.25); }
-@keyframes play-slide { to { background-position: -250% 0; } }
-
-/* ── games banner ── */
-.games-banner {
-  --accent: var(--green);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  padding: 26px 28px;
-  border-radius: 12px;
-  border: 1px solid var(--surface0);
-  background:
-    radial-gradient(500px circle at 100% 0%, color-mix(in srgb, var(--green) 14%, transparent), transparent 60%),
-    radial-gradient(420px circle at 0% 100%, color-mix(in srgb, var(--mauve) 12%, transparent), transparent 60%),
-    var(--mantle);
-  text-decoration: none;
-  color: inherit;
-}
-.games-banner:hover { border-color: var(--green); transform: translateY(-4px); box-shadow: 0 18px 50px rgba(0,0,0,.45); }
-.games-banner:active { transform: translateY(0) scale(.985); transition-duration: .1s; }
-.games-emoji {
-  font-size: 2.6rem;
-  line-height: 1;
-  flex-shrink: 0;
-  animation: float 4s ease-in-out infinite;
-  transition: transform .5s var(--ease-spring);
-}
-.games-banner:hover .games-emoji { transform: rotate(-12deg) scale(1.2); }
-.games-text { flex: 1; min-width: 0; }
-.games-title {
-  font-family: 'Bricolage Grotesque', sans-serif;
-  font-weight: 800;
-  font-size: 1.35rem;
-  letter-spacing: -.03em;
-  color: var(--text);
-  line-height: 1.1;
-  margin-bottom: 6px;
-}
-.games-title span { color: var(--green); }
-.games-sub { font-size: .76rem; color: var(--subtext0); line-height: 1.7; }
-.games-go {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 18px;
-  border-radius: 6px;
-  background: var(--green);
-  color: var(--crust);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transition: transform .4s var(--ease-spring), box-shadow .35s var(--ease);
-}
-.games-banner:hover .games-go { transform: translateX(4px); box-shadow: 0 6px 24px color-mix(in srgb, var(--green) 40%, transparent); }
-@media (max-width: 600px) {
-  .games-banner { flex-direction: column; align-items: flex-start; }
-}
-
 .ripple {
   position: absolute;
   border-radius: 50%;
@@ -1040,7 +967,6 @@ footer a:hover { color: var(--lavender); }
     <li><a href="#projects">Projects</a></li>
     <li><a href="#skills">Skills</a></li>
     <li><a href="#mc-character">Character</a></li>
-    <li><a href="https://zdstudios.github.io/Claude-Games/" target="_blank" rel="noopener" style="color:var(--green)">🎮 Games</a></li>
   </ul>
 </nav>
 
@@ -1080,7 +1006,6 @@ footer a:hover { color: var(--lavender); }
           <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
           View GitHub
         </a>
-        <a class="btn btn-play" href="https://zdstudios.github.io/Claude-Games/" target="_blank" rel="noopener"><span class="pad">🎮</span> Play Games</a>
         <a class="btn btn-outline" href="https://github.com/ZDStudios/SchoolMod" target="_blank" rel="noopener">SchoolMod</a>
         <a class="btn btn-outline" href="https://github.com/ZDStudios/AIOS" target="_blank" rel="noopener">AIOS</a>
         <a class="btn btn-outline" href="mailto:zdstudio12345@gmail.com">
@@ -1203,24 +1128,6 @@ footer a:hover { color: var(--lavender); }
       <div class="project-skeleton"></div>
       <div class="project-skeleton"></div>
     </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ── GAMES ── -->
-  <section id="games">
-    <div class="section-head">
-      <p class="section-kicker">built with claude</p>
-      <h2 class="section-title">Play <span>Games</span></h2>
-    </div>
-    <a class="games-banner fade" href="https://zdstudios.github.io/Claude-Games/" target="_blank" rel="noopener">
-      <span class="games-emoji">🕹️</span>
-      <div class="games-text">
-        <div class="games-title">The <span>Claude-Games</span> arcade</div>
-        <p class="games-sub">A collection of browser games made by me and Claude. No installs, just open and play.</p>
-      </div>
-      <span class="games-go">Play now &rarr;</span>
-    </a>
   </section>
 
   <div class="divider"></div>
@@ -1544,13 +1451,6 @@ footer a:hover { color: var(--lavender); }
     }
     if (!craf) { clast = performance.now(); craf = requestAnimationFrame(tickC); }
   };
-  FX.rain = () => {
-    let n = 0;
-    const id = setInterval(() => {
-      FX.confetti(Math.random() * innerWidth, -10, 14, Math.PI * 0.6, Math.PI / 2);
-      if (++n > 18) clearInterval(id);
-    }, 110);
-  };
 
   // ── click interactions ────────────────────────────────────
   document.addEventListener('click', (e) => {
@@ -1616,19 +1516,6 @@ footer a:hover { color: var(--lavender); }
     })();
   }
 
-  // ── konami code ───────────────────────────────────────────
-  const SEQ = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-  let kpos = 0;
-  addEventListener('keydown', (e) => {
-    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    kpos = k === SEQ[kpos] ? kpos + 1 : (k === SEQ[0] ? 1 : 0);
-    if (kpos === SEQ.length) {
-      kpos = 0;
-      FX.toast('🎮 konami unlocked · +30 lives');
-      FX.rain();
-    }
-  });
-  console.log('%cpsst… ↑ ↑ ↓ ↓ ← → ← → B A', 'color:#cba6f7;font-weight:bold');
 })();
 </script>
 
