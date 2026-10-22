@@ -484,6 +484,18 @@ nav {
   .games-banner { flex-direction: column; align-items: flex-start; }
 }
 
+/* ── software hacks button ── */
+.btn-hacks {
+  color: var(--crust);
+  background: linear-gradient(100deg, var(--peach), var(--red), var(--pink), var(--peach));
+  background-size: 250% 100%;
+  animation: hacks-slide 5s linear infinite;
+}
+.btn-hacks:hover { box-shadow: 0 6px 28px color-mix(in srgb, var(--peach) 40%, transparent); filter: brightness(1.08); }
+.btn-hacks .bolt { display: inline-block; transition: transform .5s var(--ease-spring); }
+.btn-hacks:hover .bolt { transform: rotate(-14deg) scale(1.25); }
+@keyframes hacks-slide { to { background-position: -250% 0; } }
+
 .ripple {
   position: absolute;
   border-radius: 50%;
@@ -1041,6 +1053,7 @@ footer a:hover { color: var(--lavender); }
     <li><a href="#skills">Skills</a></li>
     <li><a href="#mc-character">Character</a></li>
     <li><a href="https://zdstudios.github.io/Claude-Games/" target="_blank" rel="noopener" style="color:var(--green)">🎮 Games</a></li>
+    <li><a class="hacks-link" href="#" style="color:var(--peach)">Software Hacks</a></li>
   </ul>
 </nav>
 
@@ -1083,6 +1096,7 @@ footer a:hover { color: var(--lavender); }
         <a class="btn btn-play" href="https://zdstudios.github.io/Claude-Games/" target="_blank" rel="noopener"><span class="pad">🎮</span> Play Games</a>
         <a class="btn btn-outline" href="https://github.com/ZDStudios/SchoolMod" target="_blank" rel="noopener">SchoolMod</a>
         <a class="btn btn-outline" href="https://github.com/ZDStudios/AIOS" target="_blank" rel="noopener">AIOS</a>
+        <a class="btn btn-hacks hacks-link" href="#"><span class="bolt">⚡</span> Software Hacks</a>
         <a class="btn btn-outline" href="mailto:zdstudio12345@gmail.com">
           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
           Email
@@ -1399,7 +1413,7 @@ footer a:hover { color: var(--lavender); }
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  const links = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+  const links = [...document.querySelectorAll('.nav-links a[href^="#"]:not(.hacks-link)')];
   if ('IntersectionObserver' in window) {
     const secIO = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
@@ -1544,18 +1558,29 @@ footer a:hover { color: var(--lavender); }
     }
     if (!craf) { clast = performance.now(); craf = requestAnimationFrame(tickC); }
   };
-  FX.rain = () => {
-    let n = 0;
-    const id = setInterval(() => {
-      FX.confetti(Math.random() * innerWidth, -10, 14, Math.PI * 0.6, Math.PI / 2);
-      if (++n > 18) clearInterval(id);
-    }, 110);
-  };
+
+  // ── software hacks link ───────────────────────────────────
+  // 👉 paste the website address between the quotes. While it's empty,
+  //    the buttons just show a "coming soon" popup instead of a dead link.
+  const SOFTWARE_HACKS_URL = '';
+
+  document.querySelectorAll('.hacks-link').forEach((a) => {
+    if (SOFTWARE_HACKS_URL) {
+      a.href = SOFTWARE_HACKS_URL;
+      a.target = '_blank';
+      a.rel = 'noopener';
+    }
+  });
 
   // ── click interactions ────────────────────────────────────
   document.addEventListener('click', (e) => {
     const t = e.target;
     if (!t || !t.closest) return;
+
+    if (t.closest('.hacks-link') && !SOFTWARE_HACKS_URL) {
+      e.preventDefault();
+      FX.toast('software hacks: coming soon ⚡');
+    }
 
     if (t.closest('.nav-wordmark')) scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -1616,19 +1641,6 @@ footer a:hover { color: var(--lavender); }
     })();
   }
 
-  // ── konami code ───────────────────────────────────────────
-  const SEQ = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-  let kpos = 0;
-  addEventListener('keydown', (e) => {
-    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    kpos = k === SEQ[kpos] ? kpos + 1 : (k === SEQ[0] ? 1 : 0);
-    if (kpos === SEQ.length) {
-      kpos = 0;
-      FX.toast('🎮 konami unlocked · +30 lives');
-      FX.rain();
-    }
-  });
-  console.log('%cpsst… ↑ ↑ ↓ ↓ ← → ← → B A', 'color:#cba6f7;font-weight:bold');
 })();
 </script>
 
