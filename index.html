@@ -884,53 +884,6 @@ nav {
 .skill[data-c="yellow"]:hover { border-color: var(--yellow);  color: var(--yellow); background: rgba(249,226,175,.08); }
 
 /* ─────────────────────────────────────────────
-   MC CHARACTER VIEWER
-───────────────────────────────────────────── */
-.mc-viewer-frame {
-  position: relative;
-  height: 420px;
-  background: var(--mantle);
-  border: 1px solid var(--surface0);
-  border-radius: 10px;
-  overflow: hidden;
-  transition: border-color .4s var(--ease);
-}
-.mc-viewer-frame:hover { border-color: var(--surface2); }
-.mc-viewer-frame canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  cursor: grab;
-  touch-action: none;
-}
-.mc-viewer-frame:active canvas { cursor: grabbing; }
-
-.mc-loading {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .72rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--overlay1);
-}
-
-.mc-hint {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: .65rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--overlay1);
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-/* ─────────────────────────────────────────────
    FOOTER
 ───────────────────────────────────────────── */
 footer {
@@ -1011,7 +964,6 @@ footer a:hover { color: var(--lavender); }
   nav { padding: 0 20px; }
   .nav-links li a { padding: 6px 8px; }
   .page { padding: 0 20px 80px; }
-  .mc-viewer-frame { height: 320px; }
   footer { padding: 24px 20px; }
 }
 
@@ -1051,7 +1003,6 @@ footer a:hover { color: var(--lavender); }
     <li><a href="#stats">Stats</a></li>
     <li><a href="#projects">Projects</a></li>
     <li><a href="#skills">Skills</a></li>
-    <li><a href="#mc-character">Character</a></li>
     <li><a href="https://zdstudios.github.io/Claude-Games/" target="_blank" rel="noopener" style="color:var(--green)">🎮 Games</a></li>
     <li><a class="hacks-link" href="#" style="color:var(--peach)">Software Hacks</a></li>
   </ul>
@@ -1070,9 +1021,12 @@ footer a:hover { color: var(--lavender); }
 
       <p class="hero-desc fade d3">
         Developer, <span class="hl-mauve">hacker</span>, and
-        <span class="hl-blue">ML engineer</span> who enjoys poking at systems,
-        writing code that matters, and building tools that
+        <span class="hl-blue">ML engineer</span> who loves taking things apart
+        to see how they tick &mdash; and building tools that
         <span class="hl-green">push boundaries</span>.
+        I build most of my projects with <span class="hl-mauve">Claude</span> and AI by my side,
+        and I'm a <span class="hl-blue">reverse engineering</span> addict, always poking
+        my nose into places I probably shouldn't (or maybe should&nbsp;😉).
         Currently deep in low-level programming and
         <mark>neural network architectures</mark>.
       </p>
@@ -1085,6 +1039,8 @@ footer a:hover { color: var(--lavender); }
         <span class="tag tag-yellow">Neural Nets</span>
         <span class="tag tag-green">Linux</span>
         <span class="tag tag-lavender">Exploit Dev</span>
+        <span class="tag tag-red">Reverse Engineering</span>
+        <span class="tag tag-mauve">Built with Claude</span>
         <span class="tag tag-peach">Data Pipelines</span>
       </div>
 
@@ -1259,21 +1215,10 @@ footer a:hover { color: var(--lavender); }
       <span class="skill" data-c="blue">TensorFlow</span>
       <span class="skill" data-c="peach">PyTorch</span>
       <span class="skill" data-c="mauve">VS Code</span>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
-  <!-- ── MC CHARACTER ── -->
-  <section id="mc-character">
-    <div class="section-head">
-      <p class="section-kicker">say hi</p>
-      <h2 class="section-title">MC <span>Character</span></h2>
-    </div>
-    <div class="mc-viewer-frame fade" id="mc-viewer">
-      <canvas id="mc-canvas"></canvas>
-      <div class="mc-loading">loading skin…</div>
-      <p class="mc-hint">drag to rotate · scroll to zoom · click for a new pose</p>
+      <span class="skill" data-c="peach">Rust</span>
+      <span class="skill" data-c="sky">Go</span>
+      <span class="skill" data-c="mauve">Kotlin</span>
+      <span class="skill" data-c="red">Swift</span>
     </div>
   </section>
 
@@ -1624,6 +1569,7 @@ footer a:hover { color: var(--lavender); }
     const phrases = [
       'hacker · coder · ml engineer',
       'ctf player · exploit dev',
+      'reverse engineer · built with claude',
       'lead dev @ SchoolMod',
       'low-level · neural nets · linux'
     ];
@@ -1671,7 +1617,7 @@ footer a:hover { color: var(--lavender); }
   const LANG_COLORS = {
     Python:'#3572A5', JavaScript:'#f1e05a', TypeScript:'#3178c6',
     HTML:'#e34c26', CSS:'#563d7c', Shell:'#89e051',
-    Rust:'#dea584', C:'#555555', 'C++':'#f34b7d', Go:'#00ADD8',
+    Rust:'#dea584', C:'#555555', 'C++':'#f34b7d', Go:'#00ADD8', Kotlin:'#A97BFF', Swift:'#F05138',
   };
 
   const ARROW = `<svg class="project-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>`;
@@ -2001,86 +1947,5 @@ footer a:hover { color: var(--lavender); }
 })();
 </script>
 
-<!-- safety net: if the module below never resolves, stop showing "loading" -->
-<script>
-  setTimeout(function () {
-    var el = document.querySelector('#mc-viewer .mc-loading');
-    if (el && /loading/i.test(el.textContent)) {
-      el.textContent = 'could not load the 3D viewer';
-    }
-  }, 8000);
-</script>
-
-<!-- MC character viewer — powered by skinview3d (bs-community/skinview3d) -->
-<script type="module">
-  import * as skinview3d from 'https://cdn.jsdelivr.net/npm/skinview3d@3.4.1/+esm';
-
-  const MC_SKIN_URL = 'https://raw.githubusercontent.com/ZDStudios/ZDStudios/refs/heads/main/ZDStudios37.png';
-
-  function initMCViewer() {
-    const container = document.getElementById('mc-viewer');
-    const canvas = document.getElementById('mc-canvas');
-    if (!container || !canvas) return;
-
-    const viewer = new skinview3d.SkinViewer({
-      canvas: canvas,
-      width: container.clientWidth,
-      height: container.clientHeight,
-    });
-
-    viewer.zoom = 0.85;
-    viewer.autoRotate = true;
-    viewer.animation = new skinview3d.WalkingAnimation();
-    viewer.animation.speed = 0.9;
-
-    function hideLoading() {
-      const el = container.querySelector('.mc-loading');
-      if (el) el.remove();
-    }
-    function showError() {
-      const el = container.querySelector('.mc-loading');
-      if (el) el.textContent = 'skin failed to load';
-    }
-
-    Promise.resolve(viewer.loadSkin(MC_SKIN_URL)).then(hideLoading).catch(showError);
-
-    // click (without dragging) to cycle through poses
-    const poses = ['WalkingAnimation', 'RunningAnimation', 'IdleAnimation', 'FlyingAnimation']
-      .filter((n) => typeof skinview3d[n] === 'function');
-    let pi = 0, down = null;
-
-    function nextPose() {
-      if (poses.length < 2) return;
-      pi = (pi + 1) % poses.length;
-      viewer.animation = new skinview3d[poses[pi]]();
-      if (window.FX) FX.toast('pose: ' + poses[pi].replace('Animation', '').toLowerCase() + ' 🕺');
-    }
-
-    canvas.addEventListener('pointerdown', (e) => {
-      viewer.autoRotate = false; // stop the auto-spin once the person starts interacting
-      down = { x: e.clientX, y: e.clientY };
-    });
-    canvas.addEventListener('pointerup', (e) => {
-      if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5) nextPose();
-      down = null;
-    });
-
-    // don't render the 3D scene while it's off-screen
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver((es) => {
-        try { viewer.renderPaused = !es[0].isIntersecting; } catch (e) {}
-      }).observe(container);
-    }
-
-    function onResize() {
-      const w = container.clientWidth, h = container.clientHeight;
-      if (w && h) { viewer.width = w; viewer.height = h; }
-    }
-    addEventListener('resize', onResize);
-    if (window.ResizeObserver) new ResizeObserver(onResize).observe(container);
-  }
-
-  initMCViewer();
-</script>
 </body>
 </html>
