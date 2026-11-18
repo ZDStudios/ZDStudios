@@ -20,6 +20,7 @@
     --text: #cdd6f4;
     --mauve: #cba6f7;
     --green: #a6e3a1;
+    --peach: #fab387;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,6 +78,7 @@
   }
   .app + .app { margin-top: 12px; }
   .app.green { --accent: var(--green); }
+  .app.peach { --accent: var(--peach); }
 
   .app-icon {
     flex: none;
@@ -163,6 +165,18 @@
       <div class="ver">Version 2.0.0</div>
     </div>
     <a class="btn" href="https://github.com/ZDStudios/SchoolMod/releases/download/v2.0.0/SchoolMod-2.0.0-Setup.exe" aria-label="Download SchoolMod 2.0.0">Download</a>
+  </article>
+
+  <article class="app peach">
+    <div class="app-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/><path d="M11 7h3a3 3 0 0 1 3 3v3"/></svg>
+    </div>
+    <div class="app-info">
+      <h2>ScratchPy Studio</h2>
+      <p>Scratch-style visual editor that writes and runs real Python. Drag blocks, get code.</p>
+      <div class="ver">Version 1.7.0</div>
+    </div>
+    <a class="btn" href="https://github.com/ZDStudios/scratchpy-studio/releases/download/v1.7.0/ScratchPyStudio.exe" aria-label="Download ScratchPy Studio 1.7.0">Download</a>
   </article>
 </main>
 
