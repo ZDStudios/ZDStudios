@@ -507,6 +507,96 @@ nav {
 }
 @keyframes ripple { to { transform: scale(1); opacity: 0; } }
 
+/* ── software popup ── */
+.sw-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .35s var(--ease), visibility 0s linear .35s;
+}
+.sw-modal.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .35s var(--ease), visibility 0s;
+}
+.sw-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17,17,27,.6);
+  backdrop-filter: blur(8px);
+}
+.sw-card {
+  position: relative;
+  width: min(400px, 100%);
+  padding: 26px 24px 24px;
+  border-radius: 14px;
+  border: 1px solid var(--surface1);
+  background:
+    radial-gradient(380px circle at 100% 0%, color-mix(in srgb, var(--mauve) 16%, transparent), transparent 60%),
+    radial-gradient(320px circle at 0% 100%, color-mix(in srgb, var(--peach) 10%, transparent), transparent 60%),
+    var(--mantle);
+  box-shadow: 0 30px 80px rgba(0,0,0,.6);
+  transform: translateY(18px) scale(.94);
+  transition: transform .5s var(--ease-spring);
+}
+.sw-modal.open .sw-card { transform: none; }
+.sw-close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 30px; height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--overlay1);
+  font-family: inherit;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: background .3s var(--ease), color .3s var(--ease), transform .4s var(--ease-spring);
+}
+.sw-close:hover, .sw-close:focus-visible { background: var(--surface0); color: var(--text); transform: rotate(90deg); outline: none; }
+.sw-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  line-height: 1;
+  color: var(--text);
+}
+.sw-title span { color: var(--mauve); }
+.sw-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.sw-link {
+  --accent: var(--mauve);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--surface0);
+  background: var(--base);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color .3s var(--ease), transform .4s var(--ease-spring), box-shadow .35s var(--ease);
+}
+.sw-link:hover, .sw-link:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 20%, transparent);
+  outline: none;
+}
+.sw-link:active { transform: scale(.98); transition-duration: .1s; }
+.sw-ico { font-size: 1.5rem; line-height: 1; flex-shrink: 0; transition: transform .5s var(--ease-spring); }
+.sw-link:hover .sw-ico { transform: rotate(-10deg) scale(1.15); }
+.sw-name { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: .95rem; color: var(--text); }
+.sw-sub { font-size: .66rem; color: var(--subtext0); letter-spacing: .02em; }
+.sw-arrow { margin-left: auto; color: var(--overlay1); transition: color .3s var(--ease), transform .45s var(--ease-spring); }
+.sw-link:hover .sw-arrow { color: var(--accent); transform: translate(3px, -3px); }
+
 /* ── avatar ── */
 .avatar-col {
   display: flex;
@@ -987,6 +1077,34 @@ footer a:hover { color: var(--lavender); }
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <canvas id="confetti"></canvas>
 
+<!-- software popup -->
+<div class="sw-modal" id="sw-modal" role="dialog" aria-modal="true" aria-labelledby="sw-title" aria-hidden="true">
+  <div class="sw-backdrop" data-close></div>
+  <div class="sw-card">
+    <button type="button" class="sw-close" data-close aria-label="Close">&#10005;</button>
+    <p class="section-kicker">zdstudios.network</p>
+    <h3 class="sw-title" id="sw-title">Soft<span>ware</span></h3>
+    <div class="sw-list">
+      <a class="sw-link" style="--accent:var(--blue)" href="https://zdstudios.network/software.html" target="_blank" rel="noopener">
+        <span class="sw-ico">&#128736;&#65039;</span>
+        <div>
+          <div class="sw-name">Custom software</div>
+          <div class="sw-sub">zdstudios.network/software.html</div>
+        </div>
+        <svg class="sw-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+      </a>
+      <a class="sw-link" style="--accent:var(--peach)" href="https://zdstudios.network/hacks.html" target="_blank" rel="noopener">
+        <span class="sw-ico">&#9889;</span>
+        <div>
+          <div class="sw-name">Software hacks</div>
+          <div class="sw-sub">zdstudios.network/hacks.html</div>
+        </div>
+        <svg class="sw-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
 <!-- background -->
 <div class="bg-layer">
   <div class="bg-orb orb-a"></div>
@@ -1007,7 +1125,7 @@ footer a:hover { color: var(--lavender); }
     <li><a href="#projects">Projects</a></li>
     <li><a href="#skills">Skills</a></li>
     <li><a href="https://zdstudios.github.io/Claude-Games/" target="_blank" rel="noopener" style="color:var(--green)">🎮 Games</a></li>
-    <li><a class="hacks-link" href="#" style="color:var(--peach)">Software Hacks</a></li>
+    <li><a class="software-open" href="#" role="button" aria-haspopup="dialog" style="color:var(--peach)">⚡ Software</a></li>
   </ul>
 </nav>
 
@@ -1055,7 +1173,7 @@ footer a:hover { color: var(--lavender); }
         <a class="btn btn-play" href="https://zdstudios.github.io/Claude-Games/" target="_blank" rel="noopener"><span class="pad">🎮</span> Play Games</a>
         <a class="btn btn-outline" href="https://github.com/ZDStudios/SchoolMod" target="_blank" rel="noopener">SchoolMod</a>
         <a class="btn btn-outline" href="https://github.com/ZDStudios/AIOS" target="_blank" rel="noopener">AIOS</a>
-        <a class="btn btn-hacks hacks-link" href="#"><span class="bolt">⚡</span> Software Hacks</a>
+        <button type="button" class="btn btn-hacks software-open" aria-haspopup="dialog"><span class="bolt">⚡</span> Software</button>
         <a class="btn btn-outline" href="mailto:zdstudios37@gmail.com">
           <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
           Email
@@ -1361,7 +1479,7 @@ footer a:hover { color: var(--lavender); }
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  const links = [...document.querySelectorAll('.nav-links a[href^="#"]:not(.hacks-link)')];
+  const links = [...document.querySelectorAll('.nav-links a[href^="#"]:not(.software-open)')];
   if ('IntersectionObserver' in window) {
     const secIO = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
@@ -1507,16 +1625,43 @@ footer a:hover { color: var(--lavender); }
     if (!craf) { clast = performance.now(); craf = requestAnimationFrame(tickC); }
   };
 
-  // ── software hacks link ───────────────────────────────────
-  // 👉 paste the website address between the quotes. While it's empty,
-  //    the buttons just show a "coming soon" popup instead of a dead link.
-  const SOFTWARE_HACKS_URL = 'https://zdstudios.network/hacks.html';
+  // ── software popup ────────────────────────────────────────
+  const swModal = document.getElementById('sw-modal');
+  let swReturn = null;
 
-  document.querySelectorAll('.hacks-link').forEach((a) => {
-    if (SOFTWARE_HACKS_URL) {
-      a.href = SOFTWARE_HACKS_URL;
-      a.target = '_blank';
-      a.rel = 'noopener';
+  FX.openSoftware = (from) => {
+    if (!swModal) return;
+    swReturn = from || document.activeElement;
+    swModal.classList.add('open');
+    swModal.setAttribute('aria-hidden', 'false');
+    root.style.overflow = 'hidden';
+    setTimeout(() => { const f = swModal.querySelector('.sw-link'); if (f) f.focus(); }, 60);
+  };
+
+  FX.closeSoftware = () => {
+    if (!swModal || !swModal.classList.contains('open')) return;
+    swModal.classList.remove('open');
+    swModal.setAttribute('aria-hidden', 'true');
+    root.style.overflow = '';
+    if (swReturn && swReturn.focus) swReturn.focus();
+  };
+
+  if (swModal) {
+    // click the backdrop, the X, or either link -> close
+    swModal.addEventListener('click', (e) => {
+      if (e.target.closest('[data-close], .sw-link')) FX.closeSoftware();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (!swModal || !swModal.classList.contains('open')) return;
+    if (e.key === 'Escape') { FX.closeSoftware(); return; }
+    if (e.key === 'Tab') {                       // keep focus inside the popup
+      const f = [...swModal.querySelectorAll('a[href], button')];
+      if (!f.length) return;
+      const first = f[0], lastEl = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); lastEl.focus(); }
+      else if (!e.shiftKey && document.activeElement === lastEl) { e.preventDefault(); first.focus(); }
     }
   });
 
@@ -1525,10 +1670,8 @@ footer a:hover { color: var(--lavender); }
     const t = e.target;
     if (!t || !t.closest) return;
 
-    if (t.closest('.hacks-link') && !SOFTWARE_HACKS_URL) {
-      e.preventDefault();
-      FX.toast('software hacks: coming soon ⚡');
-    }
+    const swBtn = t.closest('.software-open');
+    if (swBtn) { e.preventDefault(); FX.openSoftware(swBtn); }
 
     if (t.closest('.nav-wordmark')) scrollTo({ top: 0, behavior: 'smooth' });
 
